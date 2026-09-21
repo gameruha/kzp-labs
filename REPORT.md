@@ -40,14 +40,18 @@ Ubuntu/Windows/macOS, `verify`, `package` та `upload-artifact`.
 
 ## 6. GitHub Issues і Pull Request
 
-Після створення публічного репозиторію потрібно додати Issues з мітками `infra`,
-`feature`, `bug`, `docs` та пов'язати PR конструкціями `Closes #N`.
+У репозиторії створено Issues для основних частин роботи:
+
+- [Issue #1: Implement core data parsing and validation](https://github.com/gameruha/kzp-labs/issues/1)
+- [Issue #2: Add business logic and calculations for Variant 12](https://github.com/gameruha/kzp-labs/issues/2)
+- [Issue #3: Setup unit tests and GitHub Actions CI workflow](https://github.com/gameruha/kzp-labs/issues/3)
+- [Pull Request #5: Add GitHub Actions workflow for multi-OS CI](https://github.com/gameruha/kzp-labs/pull/5)
 
 | Issue | Зміна | Коміт або PR |
 |---|---|---|
-| `[вказати номер]` | Maven, Wrapper, SpotBugs, Shade | `[вказати посилання]` |
-| `[вказати номер]` | Парсер і звіт варіанта 12 | `[вказати посилання]` |
-| `[вказати номер]` | Тести та документація | `[вказати посилання]` |
+| #3 | Maven, Wrapper, SpotBugs, Shade, CI | [PR #5](https://github.com/gameruha/kzp-labs/pull/5) |
+| #1 | Парсер і валідація варіанта 12 | [commit b46e09d](https://github.com/gameruha/kzp-labs/commit/b46e09de38c1fd2a528804247a94c2ced449f3d9) |
+| #2 | Показники та звіт варіанта 12 | [commit b46e09d](https://github.com/gameruha/kzp-labs/commit/b46e09de38c1fd2a528804247a94c2ced449f3d9) |
 
 ## 7. Приклад роботи
 
@@ -66,8 +70,8 @@ Ubuntu/Windows/macOS, `verify`, `package` та `upload-artifact`.
 ```
 
 Результат: 4 тести пройшли, SpotBugs повідомив про 0 помилок, JAR створюється.
-Посилання на успішний запуск Actions: `[додати URL запуску workflow]`.
-Посилання на артефакт JAR: `[додати URL артефакта]`.
+Успішний запуск Actions: [Java CI run #4](https://github.com/gameruha/kzp-labs/actions/runs/35627370573).
+Артефакти цього запуску: `jar-ubuntu-latest-4`, `jar-windows-latest-4`, `jar-macos-latest-4`.
 
 ## 9. Документація
 
@@ -116,5 +120,6 @@ Javadoc додано до публічного класу, `main`, методі�
 ## Версіювання рівня 3
 
 - Версія в `pom.xml` і `--version`: `1.0.0`.
-- Git-тег: створити вручну `v1.0.0` після публікації репозиторію.
-- Workflow та артефакт: додати посилання після першого успішного запуску Actions.
+- Git-тег: [`v1.0.0`](https://github.com/gameruha/kzp-labs/releases/tag/v1.0.0).
+- Workflow: [успішний запуск Java CI](https://github.com/gameruha/kzp-labs/actions/runs/35627370573).
+- Артефакти: три JAR для Ubuntu, Windows і macOS доступні на сторінці запуску workflow.
