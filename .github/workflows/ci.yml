@@ -2,14 +2,15 @@ name: Java CI
 
 on:
   push:
-    branches: [ "main-java", "lab01", "master" ]
   pull_request:
-    branches: [ "main-java", "lab01", "master" ]
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
@@ -27,5 +28,22 @@ jobs:
       if: runner.os != 'Windows'
       run: chmod +x mvnw
 
-    - name: Build and Test with Maven
-      run: ./mvnw clean test
+    - name: Verify and Package with Maven on Unix
+      if: runner.os != 'Windows'
+      run: |
+        ./mvnw -B clean verify
+        ./mvnw -B package
+
+    - name: Verify and Package with Maven on Windows
+      if: runner.os == 'Windows'
+      run: |
+        .\mvnw.cmd -B clean verify
+        .\mvnw.cmd -B package
+
+    - name: Upload executable JAR
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: jar-${{ matrix.os }}-${{ github.run_number }}
+        path: target/*.jar
+        if-no-files-found: error
