@@ -1,34 +1,57 @@
 package ua.lpnu.kzp;
 
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
-public class MainTest {
+class MainTest {
 
     @Test
-    public void testPlantCreation() {
-        Main.Plant plant = new Main.Plant("Хвойні", "Туя", 120.0, 450.0, 7);
-        assertEquals("Туя", plant.name);
-        assertEquals(120.0, plant.heightCm);
-        assertEquals(450.0, plant.price);
-        assertEquals(7, plant.wateringDays);
+    void parsesValidUkrainianRecordsAndCalculatesVariantMetrics() {
+        Main.Analysis analysis = Main.analyze(List.of(
+                "species;name;heightCm;price;wateringDays",
+                "Хвойні;Туя;120.5;450.0;7",
+                "Листяні;Клен;250.0;1200.0;14"));
+
+        assertEquals(2, analysis.plants().size());
+        String report = Main.formatReport(analysis);
+        assertTrue(report.contains("Середня висота: 185.25 см"));
+        assertTrue(report.contains("Листяні Клен (1200.00 грн)"));
+        assertTrue(report.contains("Найменший інтервал поливу: 7 днів"));
     }
 
     @Test
-    public void testCalculationsLogic() {
-        List<Main.Plant> plants = Arrays.asList(
-            new Main.Plant("А", "Рослина 1", 100.0, 200.0, 5),
-            new Main.Plant("Б", "Рослина 2", 200.0, 500.0, 10)
-        );
+    void reportsLineNumbersForInvalidRowsAndKeepsValidRows() {
+        Main.Analysis analysis = Main.analyze(List.of(
+                "species;name;heightCm;price;wateringDays",
+                "Квіти;Троянда;60.0;150.0;5",
+                "Сукуленти;;15.0;80.0;3",
+                "Декоративні;Барбарис;текст;300.0;10",
+                "неправильний;рядок"));
 
-        double avgHeight = plants.stream().mapToDouble(p -> p.heightCm).average().orElse(0.0);
-        assertEquals(150.0, avgHeight);
+        assertEquals(1, analysis.plants().size());
+        assertEquals(3, analysis.errors().size());
+        assertTrue(analysis.errors().get(0).startsWith("Рядок 3:"));
+        assertTrue(analysis.errors().get(1).startsWith("Рядок 4:"));
+        assertTrue(analysis.errors().get(2).startsWith("Рядок 5:"));
+    }
 
-        Main.Plant expensive = plants.stream().max((p1, p2) -> Double.compare(p1.price, p2.price)).orElse(null);
-        assertNotNull(expensive);
-        assertEquals("Рослина 2", expensive.name);
+    @Test
+    void handlesEmptyInputWithoutDivisionByZero() {
+        Main.Analysis analysis = Main.analyze(List.of("species;name;heightCm;price;wateringDays", ""));
+
+        String report = Main.formatReport(analysis);
+        assertTrue(report.contains("Коректних записів: 0"));
+        assertTrue(report.contains("немає жодного коректного запису"));
+    }
+
+    @Test
+    void preservesAnEmptyLastFieldDuringValidation() {
+        Main.Analysis analysis = Main.analyze(List.of("A;B;10.0;20.0;"));
+
+        assertEquals(1, analysis.errors().size());
+        assertTrue(analysis.errors().get(0).contains("Рядок 1"));
     }
 }

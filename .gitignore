@@ -1,4 +1,8 @@
-# Compiled class file
+target/
+out/
+.idea/
+.vscode/
+*.iml
 *.class
 
 # Log file
