@@ -57,10 +57,11 @@ Ubuntu/Windows/macOS, `verify`, `package` та `upload-artifact`.
 
 ## 7. Приклад роботи
 
-Команда `java -jar target/lab01-1.0.0.jar --input data/input.csv --output out/report.txt`
+У Windows PowerShell команда
+`chcp 65001 > $null; & "$env:JAVA_HOME\bin\java.exe" '-Dfile.encoding=UTF-8' -jar target\lab01-1.0.0.jar --input data\input.csv --output out\report.txt`
 обробляє три коректні записи. Порожнє ім'я та текст у числовому полі відкидаються
-з повідомленнями на кшталт `Рядок 3: species і name не можуть бути порожніми`.
-Звіт створюється в `out/report.txt` у UTF-8.
+з повідомленнями про рядок і причину. Звіт створюється в `out/report.txt` у UTF-8;
+для коректного виведення кирилиці в консолі Windows встановлюється кодова сторінка UTF-8.
 
 ## 8. Тестування
 
@@ -71,9 +72,11 @@ Ubuntu/Windows/macOS, `verify`, `package` та `upload-artifact`.
 .\mvnw.cmd verify
 ```
 
-Результат: 6 тестів пройшли, SpotBugs повідомив про 0 помилок, JAR створюється.
-Успішний запуск Actions: [Java CI run #4](https://github.com/gameruha/kzp-labs/actions/runs/35627370573).
-Артефакти цього запуску: `jar-ubuntu-latest-4`, `jar-windows-latest-4`, `jar-macos-latest-4`.
+Для поточної локальної версії: 6 тестів пройшли, SpotBugs повідомив про 0 помилок,
+JAR створюється. Успішний [Java CI run #4](https://github.com/gameruha/kzp-labs/actions/runs/35627370573)
+перевірив коміт `b46e09d` на Ubuntu, Windows і macOS; він передує поточним локальним
+змінам і є підтвердженням попередньої версії. Артефакти цього запуску:
+`jar-ubuntu-latest-4`, `jar-windows-latest-4`, `jar-macos-latest-4`.
 
 ## 9. Документація
 
