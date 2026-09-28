@@ -16,13 +16,15 @@
 ## 3. Постановка задачі
 
 Формат запису: `species:String; name:String; heightCm:double; price:double; wateringDays:int`.
+Вхідний CSV передається через обов'язковий аргумент `--input`. Висота і ціна мають
+бути скінченними числами, висота та інтервал поливу — додатними, ціна — невід'ємною.
 Показники: кількість коректних записів, середня висота, найдорожча рослина,
 найменший інтервал поливу. Некоректні рядки не зупиняють програму та містять номер
 рядка і причину помилки.
 
 ## 4. Структура програми
 
-- `Main` розбирає аргументи, читає UTF-8, валідовує рядки, обчислює показники та формує звіт.
+- `Main` розбирає аргументи командного рядка, читає UTF-8, валідовує рядки, обчислює показники та формує звіт.
 - `Main.Plant` є записом одного коректного рядка.
 - `Main.Analysis` зберігає коректні записи й помилки перевірки.
 - `data/input.csv` містить заголовок, три коректні та два некоректні приклади.
@@ -40,7 +42,7 @@ Ubuntu/Windows/macOS, `verify`, `package` та `upload-artifact`.
 
 ## 6. GitHub Issues і Pull Request
 
-У репозиторії створено Issues для основних частин роботи:
+У репозиторії створено три Issues для основних частин роботи (усі закриті):
 
 - [Issue #1: Implement core data parsing and validation](https://github.com/gameruha/kzp-labs/issues/1)
 - [Issue #2: Add business logic and calculations for Variant 12](https://github.com/gameruha/kzp-labs/issues/2)
@@ -69,7 +71,7 @@ Ubuntu/Windows/macOS, `verify`, `package` та `upload-artifact`.
 .\mvnw.cmd verify
 ```
 
-Результат: 4 тести пройшли, SpotBugs повідомив про 0 помилок, JAR створюється.
+Результат: 6 тестів пройшли, SpotBugs повідомив про 0 помилок, JAR створюється.
 Успішний запуск Actions: [Java CI run #4](https://github.com/gameruha/kzp-labs/actions/runs/35627370573).
 Артефакти цього запуску: `jar-ubuntu-latest-4`, `jar-windows-latest-4`, `jar-macos-latest-4`.
 

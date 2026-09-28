@@ -3,6 +3,9 @@ package ua.lpnu.kzp;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -53,5 +56,34 @@ class MainTest {
 
         assertEquals(1, analysis.errors().size());
         assertTrue(analysis.errors().get(0).contains("Рядок 1"));
+    }
+
+    @Test
+    void rejectsNonFiniteNumbersButAcceptsFractionalPrices() {
+        Main.Analysis analysis = Main.analyze(List.of(
+                "A;Valid;10.5;12.75;2",
+                "A;Not a number;10.0;NaN;2",
+                "A;Infinite price;10.0;Infinity;2",
+                "A;Infinite height;Infinity;10.0;2"));
+
+        assertEquals(1, analysis.plants().size());
+        assertEquals(3, analysis.errors().size());
+        assertTrue(analysis.errors().get(0).contains("скінченною"));
+        assertTrue(Main.formatReport(analysis).contains("12.75 грн"));
+    }
+
+    @Test
+    void requiresInputPathForRegularCommandLineInvocation() {
+        PrintStream originalError = System.err;
+        ByteArrayOutputStream capturedError = new ByteArrayOutputStream();
+        try (PrintStream replacementError = new PrintStream(capturedError, true, StandardCharsets.UTF_8)) {
+            System.setErr(replacementError);
+            Main.main(new String[0]);
+        } finally {
+            System.setErr(originalError);
+        }
+
+        assertTrue(capturedError.toString(StandardCharsets.UTF_8)
+                .contains("потрібно вказати вхідний файл через --input"));
     }
 }

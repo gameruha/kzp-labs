@@ -6,17 +6,17 @@
 
 ## Формат входу
 
-Файл за замовчуванням: `data/input.csv`. Кодування UTF-8, роздільник полів `;`.
-Поля запису:
+Вхідний файл передається обов'язковим аргументом `--input`. Прикладовий файл:
+`data/input.csv`. Кодування UTF-8, роздільник полів `;`. Поля запису:
 
 ```text
 species;name;heightCm;price;wateringDays
 ```
 
-`heightCm` і `price` є десятковими числами з крапкою. `heightCm` та `wateringDays`
-мають бути більшими за нуль, `price` не може бути від'ємним. Порожні текстові поля,
-неправильна кількість полів, неправильні числа та порожні рядки відкидаються із
-зазначенням номера рядка.
+`heightCm` і `price` є скінченними десятковими числами з крапкою. `heightCm` та
+`wateringDays` мають бути більшими за нуль, `price` не може бути від'ємним. Порожні
+текстові поля, неправильна кількість полів, некоректні, нескінченні та нечислові
+значення, а також порожні рядки відкидаються із зазначенням номера рядка.
 
 ## Показники варіанта 12
 
@@ -27,18 +27,20 @@ species;name;heightCm;price;wateringDays
 
 ## Збірка і запуск
 
+Потрібен JDK 21; для запуску JAR команда `java` має використовувати саме цю версію.
+
 Windows:
 
 ```text
 .\mvnw.cmd clean verify package
-java -jar target\lab01-1.0.0.jar
+java -jar target\lab01-1.0.0.jar --input data\input.csv
 ```
 
 macOS/Linux:
 
 ```text
 ./mvnw clean verify package
-java -jar target/lab01-1.0.0.jar
+java -jar target/lab01-1.0.0.jar --input data/input.csv
 ```
 
 Доступні режими:
@@ -49,8 +51,10 @@ java -jar target/lab01-1.0.0.jar --version
 java -jar target/lab01-1.0.0.jar --input data/input.csv --output out/report.txt
 ```
 
+`--input <файл>` обов'язковий для звичайного запуску; `--output <файл>` необов'язковий.
 За замовчуванням звіт записується в `out/report.txt`. Для дробових чисел використовується
-`Locale.ROOT`, а для файлів явно задається UTF-8.
+`Locale.ROOT`, а для файлів явно задається UTF-8. Каталоги `target/` (зібрані Maven-файли)
+та `out/` (згенерований звіт) ігноруються Git.
 
 ## Перевірки
 

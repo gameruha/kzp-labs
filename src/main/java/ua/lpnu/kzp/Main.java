@@ -13,7 +13,6 @@ import java.util.Locale;
 public final class Main {
 
     private static final String VERSION = "1.0.0";
-    private static final Path DEFAULT_INPUT = Path.of("data", "input.csv");
     private static final Path DEFAULT_OUTPUT = Path.of("out", "report.txt");
     private static final String HEADER = "species;name;heightCm;price;wateringDays";
 
@@ -82,8 +81,8 @@ public final class Main {
                 int wateringDays = Integer.parseInt(fields[4].trim());
                 if (!Double.isFinite(heightCm) || !Double.isFinite(price)
                         || heightCm <= 0 || price < 0 || wateringDays <= 0) {
-                    errors.add("Рядок %d: heightCm і wateringDays мають бути додатними, price не може бути від'ємним"
-                            .formatted(lineNumber));
+                    errors.add("Рядок %d: heightCm має бути скінченною і додатною, price — скінченною і невід'ємною, wateringDays має бути додатним"
+                        .formatted(lineNumber));
                     continue;
                 }
                 plants.add(new Plant(fields[0].trim(), fields[1].trim(), heightCm, price, wateringDays));
@@ -161,7 +160,7 @@ public final class Main {
 
     private record Arguments(Path input, Path output, boolean help, boolean version) {
         private static Arguments parse(String[] args) {
-            Path input = DEFAULT_INPUT;
+            Path input = null;
             Path output = DEFAULT_OUTPUT;
             boolean help = false;
             boolean version = false;
@@ -173,6 +172,9 @@ public final class Main {
                     case "--output" -> output = value(args, ++index, "--output");
                     default -> throw new IllegalArgumentException("невідомий аргумент: " + args[index]);
                 }
+            }
+            if (!help && !version && input == null) {
+                throw new IllegalArgumentException("потрібно вказати вхідний файл через --input");
             }
             return new Arguments(input, output, help, version);
         }
