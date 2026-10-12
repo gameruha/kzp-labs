@@ -5,14 +5,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
 /** Console application for processing plant nursery records, variant 12. */
 public final class Main {
 
-    private static final String VERSION = "1.0.0";
+    private static final String VERSION = "2.0.0";
     private static final Path DEFAULT_OUTPUT = Path.of("out", "report.txt");
     private static final String HEADER = "species;name;heightCm;price;wateringDays";
 
@@ -25,25 +24,32 @@ public final class Main {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
+        System.exit(run(args));
+    }
+
+    static int run(String[] args) {
         try {
             Arguments arguments = Arguments.parse(args);
             if (arguments.help()) {
                 System.out.print(helpText());
-                return;
+                return 0;
             }
             if (arguments.version()) {
                 System.out.println(VERSION);
-                return;
+                return 0;
             }
             Analysis analysis = analyze(Files.readAllLines(arguments.input(), StandardCharsets.UTF_8));
             String report = formatReport(analysis);
             System.out.print(report);
             writeReport(arguments.output(), report);
+            return 0;
         } catch (IllegalArgumentException exception) {
-            System.err.println("Помилка аргументів: " + exception.getMessage());
+            System.err.println("Помилка аргументів: %s".formatted(exception.getMessage()));
             System.err.print(helpText());
+            return 2;
         } catch (IOException exception) {
-            System.err.println("Помилка роботи з файлами: " + exception.getMessage());
+            System.err.println("Помилка роботи з файлами: %s".formatted(exception.getMessage()));
+            return 1;
         }
     }
 
@@ -66,28 +72,10 @@ public final class Main {
                 errors.add("Рядок %d: порожній рядок".formatted(lineNumber));
                 continue;
             }
-            String[] fields = line.split(";", -1);
-            if (fields.length != 5) {
-                errors.add("Рядок %d: очікується 5 полів".formatted(lineNumber));
-                continue;
-            }
-            if (fields[0].isBlank() || fields[1].isBlank()) {
-                errors.add("Рядок %d: species і name не можуть бути порожніми".formatted(lineNumber));
-                continue;
-            }
             try {
-                double heightCm = Double.parseDouble(fields[2].trim());
-                double price = Double.parseDouble(fields[3].trim());
-                int wateringDays = Integer.parseInt(fields[4].trim());
-                if (!Double.isFinite(heightCm) || !Double.isFinite(price)
-                        || heightCm <= 0 || price < 0 || wateringDays <= 0) {
-                    errors.add("Рядок %d: heightCm має бути скінченною і додатною, price — скінченною і невід'ємною, wateringDays має бути додатним"
-                        .formatted(lineNumber));
-                    continue;
-                }
-                plants.add(new Plant(fields[0].trim(), fields[1].trim(), heightCm, price, wateringDays));
-            } catch (NumberFormatException exception) {
-                errors.add("Рядок %d: неправильний числовий формат".formatted(lineNumber));
+                plants.add(Plant.fromCsv(line));
+            } catch (IllegalArgumentException exception) {
+                errors.add("Рядок %d: %s".formatted(lineNumber, exception.getMessage()));
             }
         }
         return new Analysis(plants, errors);
@@ -100,26 +88,19 @@ public final class Main {
      * @return formatted report
      */
     public static String formatReport(Analysis analysis) {
-        int count = analysis.plants().size();
-        double averageHeight = count == 0 ? 0.0
-                : analysis.plants().stream().mapToDouble(Plant::heightCm).average().orElse(0.0);
-        Plant mostExpensive = analysis.plants().stream()
-                .max(Comparator.comparingDouble(Plant::price)).orElse(null);
-        int minimumWateringDays = analysis.plants().stream()
-                .mapToInt(Plant::wateringDays).min().orElse(0);
+        PlantSummary summary = PlantSummary.from(analysis.plants());
 
         StringBuilder report = new StringBuilder();
         report.append("=== Звіт розсадника рослин (варіант 12) ===%n".formatted());
-        report.append("Коректних записів: %d%n".formatted(count));
-        report.append(String.format(Locale.ROOT, "Середня висота: %.2f см%n", averageHeight));
-        report.append("Найдорожча рослина: %s%n".formatted(mostExpensive == null
+        report.append("Коректних записів: %d%n".formatted(summary.count()));
+        report.append(String.format(Locale.ROOT, "Середня висота: %.2f см%n", summary.averageHeightCm()));
+        report.append("Найдорожча рослина: %s%n".formatted(summary.mostExpensive() == null
                 ? "немає коректних записів"
-                : String.format(Locale.ROOT, "%s %s (%.2f грн)", mostExpensive.species(),
-                    mostExpensive.name(), mostExpensive.price())));
-        report.append("Найменший інтервал поливу: %d днів%n".formatted(minimumWateringDays));
+            : summary.mostExpensive()));
+        report.append("Найменший інтервал поливу: %d днів%n".formatted(summary.minimumWateringDays()));
         report.append("Помилок: %d%n".formatted(analysis.errors().size()));
         analysis.errors().forEach(error -> report.append(error).append(System.lineSeparator()));
-        if (count == 0) {
+        if (summary.count() == 0) {
             report.append("Помилка: немає жодного коректного запису").append(System.lineSeparator());
         }
         return report.toString();
@@ -142,12 +123,9 @@ public final class Main {
 
     /** Returns command-line usage instructions. */
     public static String helpText() {
-        return "Використання: java -jar lab01-1.0.0.jar [--help] [--version] "
-                + "[--input <файл>] [--output <файл>]%n".formatted();
-    }
-
-    /** A validated plant record from the input file. */
-    public record Plant(String species, String name, double heightCm, double price, int wateringDays) {
+        return """
+            Використання: java -jar lab01-2.0.0.jar [--help] [--version] [--input <файл>] [--output <файл>]
+            """;
     }
 
     /** Parsed records and validation errors. */
@@ -170,7 +148,8 @@ public final class Main {
                     case "--version" -> version = true;
                     case "--input" -> input = value(args, ++index, "--input");
                     case "--output" -> output = value(args, ++index, "--output");
-                    default -> throw new IllegalArgumentException("невідомий аргумент: " + args[index]);
+                    default -> throw new IllegalArgumentException(
+                            "невідомий аргумент: %s".formatted(args[index]));
                 }
             }
             if (!help && !version && input == null) {
@@ -181,7 +160,7 @@ public final class Main {
 
         private static Path value(String[] args, int index, String option) {
             if (index >= args.length) {
-                throw new IllegalArgumentException("після " + option + " потрібно вказати шлях");
+                throw new IllegalArgumentException("після %s потрібно вказати шлях".formatted(option));
             }
             return Path.of(args[index]);
         }

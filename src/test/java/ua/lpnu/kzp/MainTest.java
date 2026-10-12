@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -78,12 +80,20 @@ class MainTest {
         ByteArrayOutputStream capturedError = new ByteArrayOutputStream();
         try (PrintStream replacementError = new PrintStream(capturedError, true, StandardCharsets.UTF_8)) {
             System.setErr(replacementError);
-            Main.main(new String[0]);
+            assertEquals(2, Main.run(new String[0]));
         } finally {
             System.setErr(originalError);
         }
 
         assertTrue(capturedError.toString(StandardCharsets.UTF_8)
                 .contains("потрібно вказати вхідний файл через --input"));
+    }
+
+    @Test
+    void returnsStatusCodesForHelpAndInputFileErrors() throws Exception {
+        assertEquals(0, Main.run(new String[] {"--help"}));
+
+        Path missingInput = Files.createTempDirectory("main-test").resolve("missing.csv");
+        assertEquals(1, Main.run(new String[] {"--input", missingInput.toString()}));
     }
 }

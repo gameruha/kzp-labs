@@ -1,4 +1,4 @@
-# Лабораторна робота № 1: розсадник рослин
+# Лабораторні роботи № 1 і № 2: розсадник рослин
 
 Консольна Java-програма для варіанта 12 з курсу «Кросплатформні засоби програмування».
 Програма читає записи розсадника рослин, відкидає некоректні рядки з поясненням,
@@ -25,30 +25,42 @@ species;name;heightCm;price;wateringDays
 3. Найдорожча рослина.
 4. Найменший інтервал поливу.
 
+## Модель після лабораторної роботи № 2
+
+`Plant` — незмінна сутність із приватними полями та перевіркою інваріантів у конструкторі.
+Фабрика `Plant.fromCsv` розбирає п'ять CSV-полів; вона відхиляє порожні назви,
+неправильний числовий формат, нескінченні значення, висоту й інтервал поливу не більше
+нуля, а також від'ємну ціну. `PlantSummary` — record із кількістю записів, середньою
+висотою, найдорожчою рослиною та найменшим інтервалом поливу. CLI й формат звіту
+збережені сумісними з лабораторною роботою № 1.
+
 ## Збірка і запуск
 
 Потрібен JDK 21; для запуску JAR команда `java` має використовувати саме цю версію.
 
 Windows:
 
-```text
+```powershell
 .\mvnw.cmd clean verify package
-java -jar target\lab01-1.0.0.jar --input data\input.csv
+chcp 65001 > $null; & "$env:JAVA_HOME\bin\java.exe" '-Dfile.encoding=UTF-8' -jar target\lab01-2.0.0.jar --input data\input.csv
 ```
+
+Команда запуску вище призначена для PowerShell і вмикає UTF-8, щоб український текст
+правильно відображався в консолі Windows.
 
 macOS/Linux:
 
 ```text
 ./mvnw clean verify package
-java -jar target/lab01-1.0.0.jar --input data/input.csv
+java -jar target/lab01-2.0.0.jar --input data/input.csv
 ```
 
 Доступні режими:
 
 ```text
-java -jar target/lab01-1.0.0.jar --help
-java -jar target/lab01-1.0.0.jar --version
-java -jar target/lab01-1.0.0.jar --input data/input.csv --output out/report.txt
+java -jar target/lab01-2.0.0.jar --help
+java -jar target/lab01-2.0.0.jar --version
+java -jar target/lab01-2.0.0.jar --input data/input.csv --output out/report.txt
 ```
 
 `--input <файл>` обов'язковий для звичайного запуску; `--output <файл>` необов'язковий.
