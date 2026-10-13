@@ -169,15 +169,16 @@ Windows 11. Формат CSV і предметні показники успад
 
 Java 21, Maven Wrapper, JUnit 5, SpotBugs, Shade Plugin і workflow з матрицею трьох ОС
 успадковано без зміни. Локальний `verify` перевіряє тести й SpotBugs; запуск JAR версії
-`2.0.0` із `data/input.csv` створює звіт і повертає код `0`. GitHub Actions перевіряє цю
-версію на Ubuntu, Windows і macOS у Pull Request.
+`2.0.0` із `data/input.csv` створює звіт і повертає код `0`. [Java CI run #16](https://github.com/gameruha/kzp-labs/actions/runs/38311064586)
+успішно перевірив коміт `763c8cd` у PR #8 на Ubuntu, Windows і macOS; JAR-артефакти
+доступні на сторінці цього запуску.
 
 ### 8. GitHub Issues і Pull Request
 
 - [Issue #7: Refactor nursery records into Plant entities and summary record](https://github.com/gameruha/kzp-labs/issues/7)
 - [Issue #6: Return process exit codes from Main](https://github.com/gameruha/kzp-labs/issues/6) — виправлення CLI з лабораторної № 1.
 - [Issue #7: Refactor nursery records into Plant entities and summary record](https://github.com/gameruha/kzp-labs/issues/7) — клас сутності й record.
-- Pull Request закриває Issues #6 і #7 після злиття.
+- [Pull Request #8: Lab 2: validated plant entities and summary record](https://github.com/gameruha/kzp-labs/pull/8), `Closes #6` і `Closes #7`.
 
 ### 9. Порівняння поведінки
 
@@ -223,4 +224,4 @@ Java 21, Maven Wrapper, JUnit 5, SpotBugs, Shade Plugin і workflow з матр�
 ### Версіювання
 
 - Версія Maven і `--version`: `2.0.0`.
-- Git-тег лабораторної № 2: `v2.0.0`.
+- Git-тег лабораторної № 2: [`v2.0.0`](https://github.com/gameruha/kzp-labs/releases/tag/v2.0.0).
