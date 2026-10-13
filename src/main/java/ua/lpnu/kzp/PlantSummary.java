@@ -16,6 +16,7 @@ import java.util.Objects;
 public record PlantSummary(int count, double averageHeightCm,
                            Plant mostExpensive, int minimumWateringDays) {
 
+        /** Validates that the summary values are consistent with the number of plants. */
         public PlantSummary {
                 if (count < 0 || !Double.isFinite(averageHeightCm) || averageHeightCm < 0
                                 || minimumWateringDays < 0

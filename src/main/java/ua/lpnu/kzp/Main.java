@@ -121,15 +121,25 @@ public final class Main {
         Files.writeString(output, report, StandardCharsets.UTF_8);
     }
 
-    /** Returns command-line usage instructions. */
+    /**
+     * Returns command-line usage instructions.
+     *
+     * @return usage text
+     */
     public static String helpText() {
         return """
             Використання: java -jar lab01-2.0.0.jar [--help] [--version] [--input <файл>] [--output <файл>]
             """;
     }
 
-    /** Parsed records and validation errors. */
+    /**
+     * Parsed records and validation errors.
+     *
+     * @param plants validated plant records
+     * @param errors validation errors with source line numbers
+     */
     public record Analysis(List<Plant> plants, List<String> errors) {
+        /** Copies both lists and prevents later external mutation. */
         public Analysis {
             plants = List.copyOf(plants);
             errors = List.copyOf(errors);

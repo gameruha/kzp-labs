@@ -70,27 +70,47 @@ public final class Plant {
         }
     }
 
-    /** Returns the plant species. */
+    /**
+     * Returns the plant species.
+     *
+     * @return plant species
+     */
     public String species() {
         return species;
     }
 
-    /** Returns the plant name. */
+    /**
+     * Returns the plant name.
+     *
+     * @return plant name
+     */
     public String name() {
         return name;
     }
 
-    /** Returns the plant height in centimeters. */
+    /**
+     * Returns the plant height in centimeters.
+     *
+     * @return plant height in centimeters
+     */
     public double heightCm() {
         return heightCm;
     }
 
-    /** Returns the plant price. */
+    /**
+     * Returns the plant price.
+     *
+     * @return plant price
+     */
     public double price() {
         return price;
     }
 
-    /** Returns the watering interval in days. */
+    /**
+     * Returns the watering interval in days.
+     *
+     * @return watering interval in days
+     */
     public int wateringDays() {
         return wateringDays;
     }
