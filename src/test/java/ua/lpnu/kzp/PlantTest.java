@@ -24,19 +24,19 @@ class PlantTest {
     @Test
     void rejectsEmptyNamesAndInvalidMeasurements() {
         assertThrows(NullPointerException.class,
-            () -> new Plant(null, "Туя", 1.0, 0.0, 1));
+            () -> new Flower(null, "Туя", 1.0, 0.0, 1));
         assertThrows(NullPointerException.class,
-            () -> new Plant("Хвойні", null, 1.0, 0.0, 1));
+            () -> new Flower("Хвойні", null, 1.0, 0.0, 1));
         assertThrows(IllegalArgumentException.class,
-                () -> new Plant(" ", "Туя", 1.0, 0.0, 1));
+                () -> new Flower(" ", "Туя", 1.0, 0.0, 1));
         assertThrows(IllegalArgumentException.class,
-                () -> new Plant("Хвойні", "Туя", 0.0, 0.0, 1));
+                () -> new Flower("Хвойні", "Туя", 0.0, 0.0, 1));
         assertThrows(IllegalArgumentException.class,
-                () -> new Plant("Хвойні", "Туя", 1.0, -1.0, 1));
+                () -> new Flower("Хвойні", "Туя", 1.0, -1.0, 1));
         assertThrows(IllegalArgumentException.class,
-                () -> new Plant("Хвойні", "Туя", 1.0, 0.0, 0));
+                () -> new Flower("Хвойні", "Туя", 1.0, 0.0, 0));
         assertThrows(IllegalArgumentException.class,
-                () -> new Plant("Хвойні", "Туя", Double.NaN, 0.0, 1));
+                () -> new Flower("Хвойні", "Туя", Double.NaN, 0.0, 1));
     }
 
     @Test
