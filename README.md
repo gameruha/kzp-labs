@@ -1,4 +1,4 @@
-# Лабораторні роботи № 1 і № 2: розсадник рослин
+# Лабораторні роботи № 1–3: розсадник рослин
 
 Консольна Java-програма для варіанта 12 з курсу «Кросплатформні засоби програмування».
 Програма читає записи розсадника рослин, відкидає некоректні рядки з поясненням,
@@ -34,6 +34,20 @@ species;name;heightCm;price;wateringDays
 висотою, найдорожчою рослиною та найменшим інтервалом поливу. CLI й формат звіту
 збережені сумісними з лабораторною роботою № 1.
 
+## Модель після лабораторної роботи № 3
+
+`Plant` став `sealed abstract` базовим типом: у ньому лежать спільні поля, перевірка
+інваріантів, `equals`/`hashCode`, `toString` і абстрактний метод `careNeed()` (потреба в
+догляді). Дозволені підтипи: `Tree` (дерево) та `Flower` (квітка). Кожен підтип має власні
+правила (`Tree`: висота до 10 000 см, полив не рідше ніж раз на 60 днів; `Flower`: висота до
+200 см, полив не рідше ніж раз на 30 днів) і власну формулу `careNeed()`. Enum `PlantKind`
+(`TREE`, `FLOWER`) має підпис `label()` для звіту; категорія визначається за колонкою
+`species` (хвойні, листяні, плодові, дерева — дерева, решта — квіти), тому формат CSV не змінився.
+Звіт і далі містить усі показники лабораторної № 2 без змін; після них додано кількість
+рослин за категоріями, сумарну потребу в догляді та кількість унікальних рослин.
+`PlantPlacement` показує `switch` зі зіставленням зі зразком над запечатаною ієрархією.
+Версія береться лише з `pom.xml`.
+
 ## Збірка і запуск
 
 Потрібен JDK 21; для запуску JAR команда `java` має використовувати саме цю версію.
@@ -42,7 +56,7 @@ Windows:
 
 ```powershell
 .\mvnw.cmd clean verify package
-chcp 65001 > $null; & "$env:JAVA_HOME\bin\java.exe" '-Dfile.encoding=UTF-8' -jar target\lab01-2.0.0.jar --input data\input.csv
+chcp 65001 > $null; & "$env:JAVA_HOME\bin\java.exe" '-Dfile.encoding=UTF-8' -jar target\lab01-3.0.0.jar --input data\input.csv
 ```
 
 Команда запуску вище призначена для PowerShell і вмикає UTF-8, щоб український текст
@@ -52,15 +66,15 @@ macOS/Linux:
 
 ```text
 ./mvnw clean verify package
-java -jar target/lab01-2.0.0.jar --input data/input.csv
+java -jar target/lab01-3.0.0.jar --input data/input.csv
 ```
 
 Доступні режими:
 
 ```text
-java -jar target/lab01-2.0.0.jar --help
-java -jar target/lab01-2.0.0.jar --version
-java -jar target/lab01-2.0.0.jar --input data/input.csv --output out/report.txt
+java -jar target/lab01-3.0.0.jar --help
+java -jar target/lab01-3.0.0.jar --version
+java -jar target/lab01-3.0.0.jar --input data/input.csv --output out/report.txt
 ```
 
 `--input <файл>` обов'язковий для звичайного запуску; `--output <файл>` необов'язковий.
