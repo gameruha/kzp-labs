@@ -24,11 +24,15 @@
 
 ## 4. Структура програми
 
-- `Main` розбирає аргументи командного рядка, читає UTF-8, валідовує рядки, обчислює показники та формує звіт.
-- `Main.Plant` є записом одного коректного рядка.
-- `Main.Analysis` зберігає коректні записи й помилки перевірки.
+- `Main` лише запускає перевірку аргументів і `Controller`, обробляє помилки та завершує процес через `System.exit(код)`.
+- `ArgumentParser` і `CommandLineOptions` розбирають та перевіряють аргументи командного рядка.
+- `Controller` керує обробкою: довідка, версія або читання UTF-8, аналіз, звіт і запис файлу.
+- `PlantAnalyzer` валідує рядки CSV і створює `Analysis` (коректні записи та помилки з номерами рядків).
+- `ReportFormatter` формує один текст звіту для консолі та файлу.
+- `Plant` є сутністю одного коректного рядка, `PlantSummary` — підсумковим record.
+- `ApplicationInfo` читає версію й ім'я JAR із `version.properties`, який заповнює Maven із `pom.xml`.
 - `data/input.csv` містить заголовок, три коректні та два некоректні приклади.
-- `MainTest` перевіряє метрики, український текст, помилки, номери рядків і порожній набір.
+- Тести: `MainTest`, `ArgumentParserTest`, `PlantAnalyzerTest`, `PlantTest`, `ApplicationInfoTest`.
 
 Потік даних: аргументи → `Path` → `Files.readAllLines(..., UTF_8)` → `split(";", -1)`
 → перевірка → `Analysis` → один текст звіту → консоль і `out/report.txt`.
@@ -144,7 +148,8 @@ Windows 11. Формат CSV і предметні показники успад
 
 Раніше `Main` розбирав поля за індексами та зберігав рослину у вкладеному record.
 Тепер окремий `Plant` створює й перевіряє сутність, а `PlantSummary` обчислює метрики.
-`Main` зберігає обробку файлів, номери рядків помилок і побудову звіту.
+Після відгуку викладача `Main` скорочено до запуску: аргументи розбирає `ArgumentParser`,
+обробкою керує `Controller`, аналіз виконує `PlantAnalyzer`, звіт формує `ReportFormatter`.
 
 ### 4. Клас-сутність
 
@@ -180,10 +185,10 @@ Java 21, Maven Wrapper, JUnit 5, SpotBugs, Shade Plugin і workflow з матр�
 - [Issue #7: Refactor nursery records into Plant entities and summary record](https://github.com/gameruha/kzp-labs/issues/7) — клас сутності й record.
 - [Pull Request #8: Lab 2: validated plant entities and summary record](https://github.com/gameruha/kzp-labs/pull/8), `Closes #6` і `Closes #7`.
 
-Стан на 13.10.2026: PR #8 відкритий, незалежного review ще немає; перед злиттям
-потрібно отримати перевірку колеги. GitHub Actions run #16 завершився успішно на
-Ubuntu, Windows і macOS та завантажив по JAR-артефакту для кожної ОС. Після внесення
-цього уточнення документації CI потрібно повторно перевірити на оновленому коміті.
+Стан на 13.10.2026: PR #8 злито в `main-java` після успішного CI на Ubuntu, Windows і
+macOS (JAR-артефакти завантажено для кожної ОС). Зауваження викладача до ЛР 1 і 2
+виправлено окремо: [Issue #9](https://github.com/gameruha/kzp-labs/issues/9) і
+[Pull Request #10](https://github.com/gameruha/kzp-labs/pull/10).
 
 ### 9. Порівняння поведінки
 
@@ -193,7 +198,10 @@ Ubuntu, Windows і macOS та завантажив по JAR-артефакту �
 
 ### 10. Академічна доброчесність
 
-Використано GitHub Copilot у VS Code.
+Використано GitHub Copilot у VS Code. Виправлення за відгуком викладача (Issue #9, PR #10)
+виконано за допомогою ШІ-агента Antigravity (Gemini): він розділив `Main`, переніс версію
+в `pom.xml`, оновив тести та звіт, запустив `./mvnw clean verify` і створив Issue та PR через `gh`.
+Автор сам перевірив результат і відповідає за остаточний код.
 
 - Ролі: Рецензент — зіставлення реалізації з методичкою та вимогами викладача; DevOps — перевірка Maven і GitHub Actions; Документатор — уточнення Javadoc і REPORT.
 - Запити: «Перевір, чи виконані вимоги методички та повідомлень викладача»; «Зістав стан репозиторію з усіма трьома рівнями й перевір, чи працює збірка та JAR».
@@ -231,7 +239,27 @@ Ubuntu, Windows і macOS та завантажив по JAR-артефакту �
 Розбір і правила рослини локалізовані в `Plant`, метрики — у `PlantSummary`, а консольний
 звіт збережений. Зміни проходять перевірку у гілці лабораторної № 2 через Pull Request і CI.
 
+### Виправлення за відгуком викладача
+
+| Зауваження | Виправлення |
+|---|---|
+| `main` має завершувати програму через `System.exit(code)` | `Main.main` викликає `System.exit(run(args))`; коди: 0 — успіх, 1 — помилка файлу, 2 — помилка аргументів |
+| Тег має вказувати на останній коміт | Тег `v2.0.0` перенесено на останній коміт гілки `main-java` |
+| У звіті має бути останній запуск | Посилання на запуск CI наведено нижче |
+| Уникати конкатенації рядків | Використано `String.format`, `formatted` і `StringBuilder`; оператор `+` для рядків не застосовується |
+| `.docx` не публікувати на GitHub | Маска `*.docx` у `.gitignore`, файли не відстежуються |
+| Версія має бути в одному місці | Лише `pom.xml`; `version.properties` заповнює Maven, `--version` читає його через `ApplicationInfo` |
+| `Main` не має розростатися | Розбір аргументів, керування, аналіз і звіт винесено в `ArgumentParser`, `Controller`, `PlantAnalyzer`, `ReportFormatter` |
+
+Перевірка: `./mvnw -B clean verify package` — 18 тестів, SpotBugs без помилок; JAR повертає
+коди 0, 1 і 2 для коректного запуску, відсутнього файлу та відсутніх аргументів.
+
+Останній успішний запуск CI з кодом цих виправлень (коміт `eec7d89`, Ubuntu, Windows і macOS):
+[Java CI run 40534562545](https://github.com/gameruha/kzp-labs/actions/runs/40534562545).
+Запуск, який GitHub виконує для самого тега `v2.0.0`, доступний за посиланням:
+[Java CI для тега v2.0.0](https://github.com/gameruha/kzp-labs/actions?query=branch%3Av2.0.0).
+
 ### Версіювання
 
-- Версія Maven і `--version`: `2.0.0`.
-- Git-тег лабораторної № 2: [`v2.0.0`](https://github.com/gameruha/kzp-labs/releases/tag/v2.0.0).
+- Версія Maven і `--version`: `2.0.0` (єдине джерело — `pom.xml`).
+- Git-тег лабораторної № 2: [`v2.0.0`](https://github.com/gameruha/kzp-labs/tree/v2.0.0).
