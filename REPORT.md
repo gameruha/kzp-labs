@@ -441,5 +441,5 @@ Pull Request: [PR #17](https://github.com/gameruha/kzp-labs/pull/17) із `Close
 
 - Версія Maven і `--version`: `3.0.0` (єдине джерело — `pom.xml`).
 - Git-тег: [`v3.0.0`](https://github.com/gameruha/kzp-labs/tree/v3.0.0).
-- CI: останній запуск з кодом лабораторної (RUN_LINK_PLACEHOLDER); запуск для самого тега —
+- CI: останній запуск з кодом лабораторної ([Java CI run 40537674268](https://github.com/gameruha/kzp-labs/actions/runs/40537674268), коміт `ef63f1e`, Ubuntu, Windows і macOS, JAR-артефакти для кожної ОС); запуск для самого тега —
   [Java CI для тега v3.0.0](https://github.com/gameruha/kzp-labs/actions?query=branch%3Av3.0.0).
