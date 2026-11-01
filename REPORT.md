@@ -838,5 +838,5 @@ Pull Request: [PR #34](https://github.com/gameruha/kzp-labs/pull/34) (`Closes #2
 - Версія Maven і `--version`: `5.0.0` (єдине джерело — `pom.xml`).
 - Git-тег: [`v5.0.0`](https://github.com/gameruha/kzp-labs/tree/v5.0.0).
 - Створений CSV: [`data/lab05-records.csv`](data/lab05-records.csv) (також перевіряється у тимчасовому каталозі під час тестів і CI).
-- CI: останній запуск з кодом лабораторної (RUN5_PLACEHOLDER); запуск для самого тега —
+- CI: останній запуск з кодом лабораторної ([Java CI run 41357832588](https://github.com/gameruha/kzp-labs/actions/runs/41357832588), коміт `14dca67`, Ubuntu, Windows і macOS, JAR-артефакти для кожної ОС); запуск для самого тега —
   [Java CI для тега v5.0.0](https://github.com/gameruha/kzp-labs/actions?query=branch%3Av5.0.0).
