@@ -643,5 +643,5 @@ SpotBugs пройшли, а нові запити стануть основою 
 
 - Версія Maven і `--version`: `4.0.0` (єдине джерело — `pom.xml`).
 - Git-тег: [`v4.0.0`](https://github.com/gameruha/kzp-labs/tree/v4.0.0).
-- CI: останній запуск з кодом лабораторної (RUN4_PLACEHOLDER); запуск для самого тега —
+- CI: останній запуск з кодом лабораторної ([Java CI run 41355476983](https://github.com/gameruha/kzp-labs/actions/runs/41355476983), коміт `336361b`, Ubuntu, Windows і macOS, JAR-артефакти для кожної ОС); запуск для самого тега —
   [Java CI для тега v4.0.0](https://github.com/gameruha/kzp-labs/actions?query=branch%3Av4.0.0).
