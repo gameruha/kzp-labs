@@ -40,6 +40,7 @@ public final class ReportFormatter {
         }
         appendPolymorphicSection(report, analysis.plants());
         appendStreamSection(report, analysis.plants());
+        appendStorageSection(report, analysis.plants());
         return report.toString();
     }
 
@@ -72,6 +73,21 @@ public final class ReportFormatter {
                 .collect(Collectors.joining("; "));
         appendLine(report, "Найвищі рослини (до %d): %s", PlantStreamQueries.TOP_LIMIT,
                 top.isEmpty() ? "немає даних" : top);
+    }
+
+    /** Adds the lab 5 storage and reflective CSV metadata section. */
+    private static void appendStorageSection(StringBuilder report, List<Plant> plants) {
+        Repository<PlantRecord> repository = new Repository<>();
+        for (int index = 0; index < plants.size(); index++) {
+            repository.add(PlantRecord.fromPlant(plants.get(index), index + 1));
+        }
+        appendLine(report, "Записів у Repository<PlantRecord>: %d", repository.all().size());
+        try {
+            appendLine(report, "CSV-заголовок PlantRecord: %s",
+                    CsvExporter.headerFor(PlantRecord.class));
+        } catch (DataStorageException exception) {
+            throw new IllegalStateException("Не вдалося побудувати CSV-заголовок", exception);
+        }
     }
 
     private static void appendLine(StringBuilder report, String format, Object... arguments) {

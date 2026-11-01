@@ -18,7 +18,7 @@ public final class PlantAnalyzer {
      * @return valid records and validation messages
      */
     public static Analysis analyze(List<String> lines) {
-        List<Plant> plants = new ArrayList<>();
+        Repository<Plant> repository = new Repository<>();
         List<String> errors = new ArrayList<>();
         for (int index = 0; index < lines.size(); index++) {
             String line = lines.get(index);
@@ -31,11 +31,11 @@ public final class PlantAnalyzer {
                 continue;
             }
             try {
-                plants.add(Plant.fromCsv(line));
+                repository.add(Plant.fromCsv(line));
             } catch (IllegalArgumentException exception) {
                 errors.add("Рядок %d: %s".formatted(lineNumber, exception.getMessage()));
             }
         }
-        return new Analysis(plants, errors);
+        return new Analysis(repository.all(), errors);
     }
 }

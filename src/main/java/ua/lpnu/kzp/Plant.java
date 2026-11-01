@@ -9,11 +9,22 @@ import java.util.Objects;
  */
 public abstract sealed class Plant permits Tree, Flower {
 
+    @CsvColumn("категорія")
     private final PlantKind kind;
+
+    @CsvColumn("вид")
     private final String species;
+
+    @CsvColumn("назва")
     private final String name;
+
+    @CsvColumn("висота")
     private final double heightCm;
+
+    @CsvColumn("ціна")
     private final double price;
+
+    @CsvColumn("полив")
     private final int wateringDays;
 
     /**

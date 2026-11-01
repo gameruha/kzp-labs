@@ -1,4 +1,4 @@
-# Лабораторні роботи № 1–4: розсадник рослин
+# Лабораторні роботи № 1–5: розсадник рослин
 
 Консольна Java-програма для варіанта 12 з курсу «Кросплатформні засоби програмування».
 Програма читає записи розсадника рослин, відкидає некоректні рядки з поясненням,
@@ -67,6 +67,29 @@ species;name;heightCm;price;wateringDays
 № 2 і № 3 залишаються без змін на початку. Контрольний набір даних для запитів —
 `data/lab04-input.csv` (7 записів, дубльований вид, межа фільтра, рівна висота).
 
+## Параметризоване сховище, рефлексивний CSV-експорт і round-trip після лабораторної роботи № 5
+
+- `Repository<T>` — типобезпечне сховище в пам'яті без raw types із методами `add(T)`,
+  незмінним знімком `all()` (`List.copyOf`) та пошуком `find(Predicate<? super T>)`.
+- `@CsvColumn` — анотація часу виконання (`@Retention(RUNTIME)`, `@Target(FIELD)`) із назвою
+  стовпця `value()`.
+- `PlantRecord` — клас запису варіанта 12 (`species: String`, `ageYears: int`,
+  `heightCm: double`, `price: double`, `wateringDays: int`; стовпці `@CsvColumn`: `вид`, `вік`,
+  `висота`, `ціна`, `полив`; складений ключ round-trip: `species + ageYears`). Детермінований
+  заголовок CSV (за алфавітом Java-імен полів `ageYears`, `heightCm`, `price`, `species`,
+  `wateringDays`): `вік,висота,ціна,вид,полив`. Анотацією `@CsvColumn` також позначено поля
+  базового класу `Plant` (`Tree` і `Flower`).
+- `CsvExporter<T>` та `JsonExporter<T>` реалізують спільний інтерфейс `Exporter<T>` (завдання із
+  зірочкою), обходять ланцюжок успадкування, кешують рефлексивні поля в `ConcurrentHashMap`,
+  екранують коми, подвійні лапки й перенесення рядків і записують файли в `UTF-8`.
+- `CsvParser` — скінченний автомат над повним текстом документа, який коректно розбирає поля в
+  лапках із комами, подвоєними лапками `""` та багаторядковими значеннями.
+- `DataStorageException` — власний checked-виняток зі збереженням першопричини (`getCause()`) для
+  помилок формату, значення (`NumberFormatException`, `IllegalArgumentException`), файлової
+  системи (`IOException`) та рефлексії.
+- Контрольні файли: `data/lab05-records.csv` (5 записів, включно з комою й лапками),
+  `data/lab05-empty.csv` (лише заголовок), `data/lab05-invalid.csv` (хибний рядок).
+
 ## Збірка і запуск
 
 Потрібен JDK 21; для запуску JAR команда `java` має використовувати саме цю версію.
@@ -75,7 +98,7 @@ Windows:
 
 ```powershell
 .\mvnw.cmd clean verify package
-chcp 65001 > $null; & "$env:JAVA_HOME\bin\java.exe" '-Dfile.encoding=UTF-8' -jar target\lab01-3.0.0.jar --input data\input.csv
+chcp 65001 > $null; & "$env:JAVA_HOME\bin\java.exe" '-Dfile.encoding=UTF-8' -jar target\lab01-5.0.0.jar --input data\input.csv
 ```
 
 Команда запуску вище призначена для PowerShell і вмикає UTF-8, щоб український текст
@@ -85,15 +108,15 @@ macOS/Linux:
 
 ```text
 ./mvnw clean verify package
-java -jar target/lab01-3.0.0.jar --input data/input.csv
+java -jar target/lab01-5.0.0.jar --input data/input.csv
 ```
 
 Доступні режими:
 
 ```text
-java -jar target/lab01-3.0.0.jar --help
-java -jar target/lab01-3.0.0.jar --version
-java -jar target/lab01-3.0.0.jar --input data/input.csv --output out/report.txt
+java -jar target/lab01-5.0.0.jar --help
+java -jar target/lab01-5.0.0.jar --version
+java -jar target/lab01-5.0.0.jar --input data/input.csv --output out/report.txt
 ```
 
 `--input <файл>` обов'язковий для звичайного запуску; `--output <файл>` необов'язковий.
