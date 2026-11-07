@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "kzp-lab06"
-version = "6.0.0"
-description = "Processing plant nursery data in Python (Variant 12)"
+name = "kzp-lab07"
+version = "7.0.0"
+description = "Object-oriented processing of plant nursery data in Python (Variant 12)"
 requires-python = ">=3.11"
 dependencies = []
 
@@ -18,14 +18,21 @@ dev = [
 
 [project.scripts]
 kzp-lab06 = "kzp_lab06.cli:main"
+kzp-lab07 = "kzp_lab07.cli:main"
+kzp-oop-report = "kzp_lab07.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["src"]
 testpaths = ["tests"]
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py311"
-extend-exclude = ["src/main", "src/test", "target"]
+exclude = ["build", "dist", ".venv", ".venv-*", "src/main", "src/test", "target"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "UP"]

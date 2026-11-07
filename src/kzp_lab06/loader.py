@@ -33,9 +33,7 @@ def iter_records(path: Path) -> Iterator[dict[str, object]]:
             FIELD_ALIASES.get(name.strip(), name.strip()) for name in reader.fieldnames
         ]
         reader.fieldnames = normalized_headers
-        missing = [
-            field for field in REQUIRED_FIELDS if field not in normalized_headers
-        ]
+        missing = [field for field in REQUIRED_FIELDS if field not in normalized_headers]
         if missing:
             missing_list = ", ".join(missing)
             raise DataError(f"Відсутні обов'язкові стовпці: {missing_list}")
@@ -53,9 +51,7 @@ def _parse_row(row: dict[str, str | None], line_number: int) -> dict[str, object
     age = _parse_positive_int(row.get("age"), line_number, "age")
     height = _parse_positive_float(row.get("height"), line_number, "height")
     price = _parse_non_negative_float(row.get("price"), line_number, "price")
-    watering_days = _parse_positive_int(
-        row.get("watering_days"), line_number, "watering_days"
-    )
+    watering_days = _parse_positive_int(row.get("watering_days"), line_number, "watering_days")
 
     return {
         "species": species,
@@ -87,9 +83,7 @@ def _parse_positive_float(raw_value: str | None, line_number: int, field: str) -
     return value
 
 
-def _parse_non_negative_float(
-    raw_value: str | None, line_number: int, field: str
-) -> float:
+def _parse_non_negative_float(raw_value: str | None, line_number: int, field: str) -> float:
     value = _parse_float(raw_value, line_number, field)
     if value < 0:
         raise DataError(f"Рядок {line_number}: поле {field} не може бути від'ємним")

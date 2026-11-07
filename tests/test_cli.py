@@ -38,7 +38,5 @@ def test_cli_returns_two_and_writes_stderr_on_data_or_file_error(
     assert "Помилка даних:" in captured.err
     assert "Traceback" not in captured.err
 
-    missing_code = main(
-        ["--input", str(tmp_path / "missing.csv"), "--output", str(output_file)]
-    )
+    missing_code = main(["--input", str(tmp_path / "missing.csv"), "--output", str(output_file)])
     assert missing_code == 2

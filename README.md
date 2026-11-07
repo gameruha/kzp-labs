@@ -1,6 +1,6 @@
-# Лабораторні роботи № 1–6: розсадник рослин
+# Лабораторні роботи № 1–7: розсадник рослин
 
-Консольна Java-програма для варіанта 12 з курсу «Кросплатформні засоби програмування».
+Консольна Java- та Python-програма для варіанта 12 з курсу «Кросплатформні засоби програмування».
 Програма читає записи розсадника рослин, відкидає некоректні рядки з поясненням,
 обчислює показники та формує однаковий звіт у консоль і файл.
 
@@ -185,3 +185,46 @@ ruff format --check .
 python -m build
 kzp-lab06 --input data/lab06-input.csv --output reports/report.txt
 ```
+
+## Об'єктно-орієнтована обробка даних у Python після лабораторної роботи № 7
+
+Пакет `kzp_lab07` (`src/kzp_lab07/`, конфігурація в `pyproject.toml`, версія `7.0.0`, точки входу
+`kzp-lab07` та `kzp-oop-report`) перетворює словникові записи лабораторної № 6 на об'єкти з
+інкапсульованим станом і поліморфною поведінкою:
+
+- `models.py`:
+  - `Plant` — базовий клас рослини розсадника з `__init__`, інкапсульованими полями `_species`,
+    `_age`, `_height`, `_price`, `_watering_days`, властивостями `@property` і setter-валідацією,
+    методом `needs_frequent_watering(max_days=2)`, контрактом `care_score()` та спеціальними
+    методами `__str__`, `__repr__`, `__eq__`, `__lt__`;
+  - `Tree(Plant)` і `Flower(Plant)` — підтипи з викликом `super().__init__(...)` та різними
+    формулами спільної операції `care_score()` (для дерева — за висотою крони та віком, для квітки —
+    за частотою поливу);
+  - `CareScored(Protocol)` — спільний протокол (`@runtime_checkable`) із властивостями (`species`,
+    `age`, `height`, `price`, `watering_days`) і методом `care_score() -> float`;
+  - `CareSummary` та `ReportSummary` — незмінні `@dataclass(frozen=True)` для збереження підсумку
+    потреби в догляді й повного підсумку звіту.
+- `loader.py` — перетворення CSV-рядків безпосередньо на об'єкти `Tree` і `Flower` (`build_plant`,
+  `iter_plants`, `load_plants`) із повідомленням номера рядка у `DataError`, а також власний
+  контекстний менеджер `SafeCsvReader` (завдання із зірочкою).
+- `analysis.py` — поліморфні функції аналізу (`highest_care_plant`, `total_care_score`,
+  `average_care_score`, `sort_by_care_score`, `care_summary`, `frequent_watering`,
+  `unique_species`, `average_price_by_species`, `tallest_plant`, `average_price`, `make_summary`,
+  `compare_dict_vs_object_memory`), що працюють через спільний протокол `CareScored` без перевірок
+  конкретного підтипу (`isinstance`).
+- `reporting.py` — детерміноване форматування звіту `format_report(summary, include_care=...)`,
+  повністю сумісне із зовнішнім звітом лабораторної № 6, та безпечний запис у UTF-8 через власний
+  контекстний менеджер `SafeReportWriter` (завдання із зірочкою).
+- `cli.py` — консольний інтерфейс `kzp-lab07` / `kzp-oop-report` (`--input`, `--output`,
+  `--max-watering-days`, `--include-care`) із захистом `if __name__ == "__main__": raise SystemExit(main())`.
+
+### Команди для лабораторної роботи № 7
+
+```powershell
+python -m pytest
+ruff check .
+ruff format --check .
+python -m build --wheel
+kzp-lab07 --input data/lab07-input.csv --output reports/lab07-report.txt --include-care
+```
+
