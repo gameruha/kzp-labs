@@ -47,3 +47,34 @@ jobs:
         name: jar-${{ matrix.os }}-${{ github.run_number }}
         path: target/*.jar
         if-no-files-found: error
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    - name: Install Python package with dev dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e ".[dev]"
+
+    - name: Run pytest
+      run: pytest
+
+    - name: Run Ruff lint
+      run: ruff check .
+
+    - name: Run Ruff format check
+      run: ruff format --check .
+
+    - name: Build Python wheel and sdist
+      run: python -m build
+
+    - name: Upload wheel artifact
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: wheel-${{ matrix.os }}-${{ github.run_number }}
+        path: dist/*.whl
+        if-no-files-found: error
