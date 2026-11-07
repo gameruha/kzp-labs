@@ -1,4 +1,4 @@
-# Лабораторні роботи № 1–5: розсадник рослин
+# Лабораторні роботи № 1–6: розсадник рослин
 
 Консольна Java-програма для варіанта 12 з курсу «Кросплатформні засоби програмування».
 Програма читає записи розсадника рослин, відкидає некоректні рядки з поясненням,
@@ -139,3 +139,49 @@ java -jar target/lab01-5.0.0.jar --input data/input.csv --output out/report.txt
 `verify` запускає JUnit 5 та SpotBugs. Maven Shade Plugin створює виконуваний JAR
 із головним класом `ua.lpnu.kzp.Main`. GitHub Actions перевіряє `verify` і `package`
 на Ubuntu, Windows та macOS і завантажує JAR як артефакт.
+
+## Обробка даних засобами Python після лабораторної роботи № 6
+
+Пакет `kzp_lab06` (`src/kzp_lab06/`, конфігурація в `pyproject.toml`, версія `6.0.0`)
+реалізує обробку даних розсадника рослин (варіант 12) у Python 3.11+:
+
+- `errors.py` — предметний виняток `DataError(ValueError)`.
+- `loader.py` — читання UTF-8 CSV через `csv.DictReader` (`load_records(path)`) та потоковий
+  генератор `iter_records(path)` (завдання із зірочкою) із підтримкою як англомовних заголовків
+  варіанта 12 (`species,age,height,price,watering_days`), так і україномовних заголовків із ЛР № 5
+  (`вид,вік,висота,ціна,полив`), а також ланцюгом причин `raise DataError(...) from error`.
+- `analysis.py` — функції варіанта 12 над `list`, `dict`, `set` із трьома компрехеншнами
+  (`frequent_watering`, `unique_species`, `average_price_by_species`, `tallest_plant`,
+  `average_price`), підсумкова функція `make_summary(records, *metrics, max_watering_days=2, **labels)`
+  із параметром за замовчуванням, `*args` і `**kwargs`, а також потокова обробка `streaming_summary`
+  через `itertools.tee` та порівняння пам'яті `compare_memory_usage` через `tracemalloc`.
+- `reporting.py` — детерміноване форматування звіту `format_report(summary)` та запис у UTF-8
+  через `with path.open("w", encoding="utf-8", newline="\n")` (`write_report`).
+- `cli.py` — консольна точка входу `kzp-lab06` (`--input`, `--output`, `--max-watering-days`), яка
+  повертає код `0` за успіху та `2` у разі `DataError` або `OSError` із повідомленням у `stderr`.
+
+### Команди Python-пакета (Windows PowerShell)
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+pytest
+ruff check .
+ruff format --check .
+python -m build
+kzp-lab06 --input data/lab06-input.csv --output reports/report.txt
+```
+
+### Команди Python-пакета (Linux / macOS)
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+pytest
+ruff check .
+ruff format --check .
+python -m build
+kzp-lab06 --input data/lab06-input.csv --output reports/report.txt
+```
