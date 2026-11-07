@@ -37,13 +37,15 @@ class MainTest {
     }
 
     @Test
-    void processesInputFileAndWritesReport() throws Exception {
+    void processesInputFileAndWritesCsvFromStoredObjectsInVariantColumnOrder() throws Exception {
         Path directory = Files.createTempDirectory("main-test");
         Path input = directory.resolve("input.csv");
-        Path output = directory.resolve("out").resolve("report.txt");
-        Files.writeString(input, "Хвойні;Туя;120.5;450.0;7", StandardCharsets.UTF_8);
+        Path output = directory.resolve("out").resolve("plants.csv");
+        Files.writeString(input, "Хвойні;Туя;4;120.5;450.0;7", StandardCharsets.UTF_8);
 
         assertEquals(0, Main.run(new String[] {"--input", input.toString(), "--output", output.toString()}));
-        assertTrue(Files.readString(output, StandardCharsets.UTF_8).contains("Коректних записів: 1"));
+        String csv = Files.readString(output, StandardCharsets.UTF_8);
+        assertTrue(csv.startsWith("вид,вік,висота,ціна,полив"));
+        assertTrue(csv.contains("Хвойні,4,120.5,450.0,7"));
     }
 }

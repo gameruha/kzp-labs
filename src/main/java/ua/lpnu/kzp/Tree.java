@@ -17,8 +17,24 @@ public final class Tree extends Plant {
      * @param wateringDays watering interval in days
      */
     public Tree(String species, String name, double heightCm, double price, int wateringDays) {
+        this(species, name, 1, heightCm, price, wateringDays);
+    }
+
+    /**
+     * Creates a tree with an explicit age in years whose height does not exceed 100 m and watering
+     * interval is at most 60 days.
+     *
+     * @param species tree species
+     * @param name tree name
+     * @param ageYears tree age in years
+     * @param heightCm tree height in centimeters
+     * @param price tree price
+     * @param wateringDays watering interval in days
+     */
+    public Tree(String species, String name, int ageYears, double heightCm, double price,
+            int wateringDays) {
         // Спочатку базовий клас перевіряє спільні поля, потім підтип — власні правила.
-        super(PlantKind.TREE, species, name, heightCm, price, wateringDays);
+        super(PlantKind.TREE, species, name, ageYears, heightCm, price, wateringDays);
         if (heightCm > MAX_HEIGHT_CM || wateringDays > MAX_WATERING_DAYS) {
             throw new IllegalArgumentException(
                     "дерево: висота має бути не більшою за 10000 см, інтервал поливу — не більшим за 60 днів");

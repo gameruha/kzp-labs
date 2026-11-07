@@ -8,7 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -110,7 +110,7 @@ public final class CsvExporter<T> implements Exporter<T> {
     }
 
     /**
-     * Returns the CSV header line for the given type in deterministic field-name order.
+     * Returns the CSV header line for the given type in deterministic variant column order.
      *
      * @param type class containing {@link CsvColumn} fields
      * @return comma-separated header line
@@ -125,7 +125,7 @@ public final class CsvExporter<T> implements Exporter<T> {
 
     /**
      * Returns the accessible {@link CsvColumn}-annotated fields of {@code type} (including
-     * superclasses) sorted by Java field name, using an in-memory cache.
+     * superclasses) in deterministic declaration order, using an in-memory cache.
      *
      * @param type class to inspect
      * @return immutable list of accessible annotated fields
@@ -143,10 +143,15 @@ public final class CsvExporter<T> implements Exporter<T> {
 
     /** Discovers and validates annotated fields across the inheritance hierarchy without caching. */
     static List<Field> discoverAnnotatedFields(Class<?> type) throws DataStorageException {
-        List<Field> fields = new ArrayList<>();
+        List<Class<?>> hierarchy = new ArrayList<>();
         for (Class<?> current = type;
                 current != null && current != Object.class;
                 current = current.getSuperclass()) {
+            hierarchy.add(current);
+        }
+        Collections.reverse(hierarchy);
+        List<Field> fields = new ArrayList<>();
+        for (Class<?> current : hierarchy) {
             fields.addAll(Arrays.stream(current.getDeclaredFields())
                     .filter(field -> field.isAnnotationPresent(CsvColumn.class))
                     .toList());
@@ -154,7 +159,6 @@ public final class CsvExporter<T> implements Exporter<T> {
         if (fields.isEmpty()) {
             throw new DataStorageException("Клас не має CSV-полів: %s".formatted(type.getSimpleName()));
         }
-        fields.sort(Comparator.comparing(Field::getName));
         for (Field field : fields) {
             if (!field.trySetAccessible()) {
                 throw new DataStorageException(

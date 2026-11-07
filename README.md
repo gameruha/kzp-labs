@@ -64,8 +64,10 @@ species;name;heightCm;price;wateringDays
 | Зірочка: категорія → вид → кількість | `countByKindAndSpecies` | `Map<PlantKind, Map<String, Long>>` |
 
 `ReportFormatter` додає до звіту секцію з результатами запитів; усі рядки звіту лабораторних
-№ 2 і № 3 залишаються без змін на початку. Контрольний набір даних для запитів —
-`data/lab04-input.csv` (7 записів, дубльований вид, межа фільтра, рівна висота).
+№ 2 і № 3 залишаються без змін на початку. У моделі `Plant` (`Tree` і `Flower`) наявне поле
+`ageYears` (`вік`, додатне ціле число років). Контрольний набір даних для запитів —
+`data/lab04-input.csv` (7 записів формату `species;name;ageYears;heightCm;price;wateringDays`,
+дубльований вид, межа фільтра, рівна висота).
 
 ## Параметризоване сховище, рефлексивний CSV-експорт і round-trip після лабораторної роботи № 5
 
@@ -75,10 +77,13 @@ species;name;heightCm;price;wateringDays
   стовпця `value()`.
 - `PlantRecord` — клас запису варіанта 12 (`species: String`, `ageYears: int`,
   `heightCm: double`, `price: double`, `wateringDays: int`; стовпці `@CsvColumn`: `вид`, `вік`,
-  `висота`, `ціна`, `полив`; складений ключ round-trip: `species + ageYears`). Детермінований
-  заголовок CSV (за алфавітом Java-імен полів `ageYears`, `heightCm`, `price`, `species`,
-  `wateringDays`): `вік,висота,ціна,вид,полив`. Анотацією `@CsvColumn` також позначено поля
+  `висота`, `ціна`, `полив`; складений ключ round-trip: `species + ageYears`). Порядок стовпців
+  відповідає варіанту 12 (`species, ageYears, heightCm, price, wateringDays`):
+  `вид,вік,висота,ціна,полив`. Анотацією `@CsvColumn` також позначено відповідні п'ять полів
   базового класу `Plant` (`Tree` і `Flower`).
+- `Controller` зберігає зчитані записи у `Repository<PlantRecord>`, формує вихідний CSV-файл на
+  базі збережених об'єктів через `CsvExporter.write` у порядку колонок варіанта 12
+  (`вид,вік,висота,ціна,полив`) і виводить сформований CSV у стандартний потік виводу.
 - `CsvExporter<T>` та `JsonExporter<T>` реалізують спільний інтерфейс `Exporter<T>` (завдання із
   зірочкою), обходять ланцюжок успадкування, кешують рефлексивні поля в `ConcurrentHashMap`,
   екранують коми, подвійні лапки й перенесення рядків і записують файли в `UTF-8`.

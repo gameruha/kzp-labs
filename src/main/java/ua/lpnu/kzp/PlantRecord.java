@@ -13,8 +13,8 @@ import java.util.Objects;
  * Domain record of Variant 12 ("Розсадник рослин") for reflective CSV/JSON export and round-trip
  * restoration.
  *
- * <p>Annotated fields sorted by Java identifier: {@code ageYears} («вік»), {@code heightCm}
- * («висота»), {@code price} («ціна»), {@code species} («вид»), {@code wateringDays} («полив»).
+ * <p>Annotated fields in Variant 12 column order: {@code species} («вид»), {@code ageYears}
+ * («вік»), {@code heightCm} («висота»), {@code price} («ціна»), {@code wateringDays} («полив»).
  * Round-trip key: {@code species + ageYears}.
  */
 public final class PlantRecord {
@@ -59,7 +59,18 @@ public final class PlantRecord {
     }
 
     /**
-     * Creates a {@link PlantRecord} from a polymorphic {@link Plant} and its age in years.
+     * Creates a {@link PlantRecord} from a polymorphic {@link Plant} using its {@link Plant#ageYears()}.
+     *
+     * @param plant domain plant entity
+     * @return corresponding {@link PlantRecord}
+     */
+    public static PlantRecord fromPlant(Plant plant) {
+        Objects.requireNonNull(plant, "Рослина не може бути null");
+        return fromPlant(plant, plant.ageYears());
+    }
+
+    /**
+     * Creates a {@link PlantRecord} from a polymorphic {@link Plant} and an explicit age in years.
      *
      * @param plant domain plant entity
      * @param ageYears plant age in years
@@ -72,8 +83,8 @@ public final class PlantRecord {
     }
 
     /**
-     * Parses a single CSV line in the deterministic export column order
-     * ({@code вік,висота,ціна,вид,полив}).
+     * Parses a single CSV line in the Variant 12 export column order
+     * ({@code вид,вік,висота,ціна,полив}).
      *
      * @param line CSV record line
      * @return restored {@link PlantRecord}
@@ -85,8 +96,8 @@ public final class PlantRecord {
     }
 
     /**
-     * Restores a {@link PlantRecord} from five parsed CSV fields in deterministic order:
-     * {@code ageYears}, {@code heightCm}, {@code price}, {@code species}, {@code wateringDays}.
+     * Restores a {@link PlantRecord} from five parsed CSV fields in Variant 12 order:
+     * {@code species}, {@code ageYears}, {@code heightCm}, {@code price}, {@code wateringDays}.
      *
      * @param fields parsed CSV fields
      * @return restored {@link PlantRecord}
@@ -99,10 +110,10 @@ public final class PlantRecord {
                     "Очікується 5 полів CSV, отримано: %d".formatted(fields.size()));
         }
         try {
-            int ageYears = Integer.parseInt(fields.get(0).trim());
-            double heightCm = Double.parseDouble(fields.get(1).trim());
-            double price = Double.parseDouble(fields.get(2).trim());
-            String species = fields.get(3);
+            String species = fields.get(0);
+            int ageYears = Integer.parseInt(fields.get(1).trim());
+            double heightCm = Double.parseDouble(fields.get(2).trim());
+            double price = Double.parseDouble(fields.get(3).trim());
             int wateringDays = Integer.parseInt(fields.get(4).trim());
             return new PlantRecord(species, ageYears, heightCm, price, wateringDays);
         } catch (IllegalArgumentException exception) {

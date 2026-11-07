@@ -36,7 +36,7 @@ public final class Main {
             System.err.println("Помилка аргументів: %s".formatted(exception.getMessage()));
             System.err.print(ArgumentParser.helpText());
             return EXIT_USAGE_ERROR;
-        } catch (IOException exception) {
+        } catch (IOException | DataStorageException exception) {
             System.err.println("Помилка роботи з файлами: %s".formatted(exception.getMessage()));
             return EXIT_IO_ERROR;
         }
