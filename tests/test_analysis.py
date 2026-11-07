@@ -110,16 +110,12 @@ def test_streaming_summary_matches_list_summary_and_measures_memory() -> None:
     records = load_records(csv_path)
 
     expected = make_summary(records, max_watering_days=2, title="Потоковий звіт")
-    actual = streaming_summary(
-        iter_records(csv_path), max_watering_days=2, title="Потоковий звіт"
-    )
+    actual = streaming_summary(iter_records(csv_path), max_watering_days=2, title="Потоковий звіт")
 
     assert actual["count"] == expected["count"]
     assert actual["frequent_watering_count"] == expected["frequent_watering_count"]
     assert actual["species"] == expected["species"]
-    assert actual["average_price_by_species"] == pytest.approx(
-        expected["average_price_by_species"]
-    )
+    assert actual["average_price_by_species"] == pytest.approx(expected["average_price_by_species"])
     assert actual["tallest_plant"] == expected["tallest_plant"]
     assert actual["average_price"] == pytest.approx(expected["average_price"])
 

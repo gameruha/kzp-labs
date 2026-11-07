@@ -41,10 +41,7 @@ def average_price_by_species(records: list[dict[str, object]]) -> dict[str, floa
         grouped.setdefault(species, []).append(float(record["price"]))
 
     # Словникове включення (dict comprehension) формує підсумкову карту у стабільному порядку.
-    return {
-        species: sum(prices) / len(prices)
-        for species, prices in sorted(grouped.items())
-    }
+    return {species: sum(prices) / len(prices) for species, prices in sorted(grouped.items())}
 
 
 def tallest_plant(records: list[dict[str, object]]) -> dict[str, object] | None:
@@ -115,9 +112,7 @@ def streaming_summary(
 
     main_stream, filter_stream = itertools.tee(records_iter, 2)
     frequent_iter = (
-        record
-        for record in filter_stream
-        if int(record["watering_days"]) <= max_watering_days
+        record for record in filter_stream if int(record["watering_days"]) <= max_watering_days
     )
     frequent_count = sum(1 for _ in frequent_iter)
 
@@ -146,8 +141,7 @@ def streaming_summary(
             tallest = record
 
     avg_by_species = {
-        sp: sums_by_species[sp] / counts_by_species[sp]
-        for sp in sorted(sums_by_species)
+        sp: sums_by_species[sp] / counts_by_species[sp] for sp in sorted(sums_by_species)
     }
 
     return {

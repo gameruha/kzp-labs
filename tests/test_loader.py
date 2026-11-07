@@ -52,9 +52,7 @@ def test_load_records_rejects_empty_file_and_missing_column(tmp_path: Path) -> N
         load_records(empty_file)
 
     missing_col = tmp_path / "missing.csv"
-    missing_col.write_text(
-        "species,age,height,price\nХвойні,4,120.5,450.0\n", encoding="utf-8"
-    )
+    missing_col.write_text("species,age,height,price\nХвойні,4,120.5,450.0\n", encoding="utf-8")
     with pytest.raises(DataError, match="watering_days"):
         load_records(missing_col)
 
