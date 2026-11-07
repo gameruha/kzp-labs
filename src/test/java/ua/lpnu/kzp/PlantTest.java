@@ -12,13 +12,18 @@ class PlantTest {
     @Test
     void createsPlantFromCsvAndKeepsZeroPriceBoundary() {
         Plant plant = Plant.fromCsv(" Хвойні ; Туя ; 1.5 ; 0 ; 1 ");
+        Plant agedPlant = Plant.fromCsv(" Хвойні ; Туя ; 4 ; 120.5 ; 450.0 ; 7 ");
 
         assertEquals("Хвойні", plant.species());
         assertEquals("Туя", plant.name());
+        assertEquals(1, plant.ageYears());
+        assertEquals(4, agedPlant.ageYears());
         assertEquals(1.5, plant.heightCm());
         assertEquals(0.0, plant.price());
         assertEquals(1, plant.wateringDays());
         assertEquals("Хвойні Туя (0.00 грн)", plant.toString());
+        assertThrows(IllegalArgumentException.class,
+                () -> new Tree("Хвойні", "Туя", 0, 120.5, 450.0, 7));
     }
 
     @Test

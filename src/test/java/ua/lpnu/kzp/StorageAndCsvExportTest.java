@@ -79,7 +79,7 @@ class StorageAndCsvExportTest {
         List<PlantRecord> restored = PlantRecord.readCsv(csvPath);
 
         assertEquals(6, rows.size());
-        assertEquals("вік,висота,ціна,вид,полив", String.join(",", rows.get(0)));
+        assertEquals("вид,вік,висота,ціна,полив", String.join(",", rows.get(0)));
         assertTrue(csvText.contains("\"Хвойні, декоративні \"\"Альпійські\"\"\""));
         assertEquals(original, restored);
         assertEquals("Хвойні:4", restored.get(0).roundTripKey());
@@ -117,8 +117,8 @@ class StorageAndCsvExportTest {
 
         Path treePath = temporaryDirectory.resolve("trees.csv");
         CsvExporter.write(treePath, Tree.class,
-                List.of(new Tree("Хвойні", "Туя", 120.5, 450.0, 7)));
-        assertEquals("висота,категорія,назва,ціна,вид,полив", CsvExporter.headerFor(Tree.class));
+                List.of(new Tree("Хвойні", "Туя", 4, 120.5, 450.0, 7)));
+        assertEquals("вид,вік,висота,ціна,полив", CsvExporter.headerFor(Tree.class));
     }
 
     @Test
@@ -162,7 +162,7 @@ class StorageAndCsvExportTest {
                 () -> CsvParser.parseDocument(null));
 
         DataStorageException numberException = assertThrows(DataStorageException.class,
-                () -> PlantRecord.fromCsv("не_число,120.5,450.0,Хвойні,7"));
+                () -> PlantRecord.fromCsv("Хвойні,не_число,120.5,450.0,7"));
         assertTrue(numberException.getCause() instanceof NumberFormatException);
 
         assertEquals(PlantKind.TREE, PlantRecord.parseKind("TREE"));
@@ -237,6 +237,6 @@ class StorageAndCsvExportTest {
 
         assertTrue(actual.startsWith(expected));
         assertTrue(actual.contains("Записів у Repository<PlantRecord>: 3\n"));
-        assertTrue(actual.contains("CSV-заголовок PlantRecord: вік,висота,ціна,вид,полив\n"));
+        assertTrue(actual.contains("CSV-заголовок PlantRecord: вид,вік,висота,ціна,полив\n"));
     }
 }

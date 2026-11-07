@@ -471,13 +471,14 @@ Pull Request: [PR #17](https://github.com/gameruha/kzp-labs/pull/17) із `Close
 ### 4. Контракт даних
 
 Елемент — `Plant` (запечатаний абстрактний клас, підтипи `Tree` і `Flower`, enum `PlantKind`).
-Поля: `species`, `name`, `heightCm`, `price`, `wateringDays`; правила валідності — із
-лабораторних № 2–3 (висота й інтервал поливу додатні, ціна невід'ємна, підтипи мають власні межі).
-Формат CSV не змінено. У таблиці варіантів згадано поле «вік», але модель попередніх робіт його не
-містить: поле не додано, щоб не змінювати формат даних і попередні тести (методичка дозволяє
-уточнювати поля). Контрольний набір запитів — `data/lab04-input.csv` (7 коректних записів);
-попередній контрольний файл `data/input.csv` і звіти `lab02-expected-report.txt`,
-`lab03-expected-report.txt` збережено.
+Поля: `species` (вид), `name` (назва), `ageYears` (вік у роках), `heightCm` (висота в см), `price`
+(ціна в грн), `wateringDays` (інтервал поливу в днях); правила валідності — із лабораторних № 2–3
+плюс перевірка `ageYears > 0` (висота, вік і інтервал поливу додатні, ціна невід'ємна, підтипи мають
+власні межі). Фабрика `Plant.fromCsv` підтримує як шестиколонковий формат
+`species;name;ageYears;heightCm;price;wateringDays` (із полем віку для лабораторної № 4), так і
+п'ятиколонковий формат попередніх робіт (де за замовчуванням `ageYears = 1`). Контрольний набір
+запитів — `data/lab04-input.csv` (7 коректних записів із полем `ageYears`); попередній контрольний
+файл `data/input.csv` і звіти `lab02-expected-report.txt`, `lab03-expected-report.txt` збережено.
 
 Константи: поріг фільтра `FREQUENT_WATERING_DAYS = 2` (значення 1, 2 і 3 у даних — до, на межі й
 після порога), `TOP_LIMIT = 5`.
@@ -599,10 +600,12 @@ Pull Request: [PR #26](https://github.com/gameruha/kzp-labs/pull/26) (`Closes #1
   Javadoc; Рецензент — відсутність побічних ефектів і розгалужень за підтипом.
 - Запити: прочитати методичку лабораторної № 4; реалізувати п'ять запитів і `Optional` для варіанта 12
   зі збереженням звіту; створити Issues, гілку, PR, тести й звіт.
-- Прийнято: окремий клас запитів, `EnumMap` для стабільного порядку, `reversed()` до `thenComparing`,
-  явна обробка порожньої статистики, окремий контрольний файл замість зміни `input.csv`.
-- Відхилено: зміну `data/input.csv` (порушила б еталонний звіт попередніх робіт), додавання поля
-  «вік» (змінило б формат CSV), `parallelStream()` на малому наборі.
+- Прийнято: окремий клас запитів, додавання поля `ageYears` (вік) до `Plant` (`Tree` і `Flower`) зі
+  збереженням сумісності 5-колонкового та 6-колонкового CSV, `EnumMap` для стабільного порядку,
+  `reversed()` до `thenComparing`, явна обробка порожньої статистики, окремий контрольний файл
+  замість зміни `input.csv`.
+- Відхилено: зміну `data/input.csv` (порушила б еталонний звіт попередніх робіт), `parallelStream()`
+  на малому наборі.
 - Виправлено: у `ReportFormatter` цикл по `PlantKind` замінено на потік; у тесті текст звіту
   зібрано через `String.join` і `formatted` замість конкатенації.
 - Внесок автора: вибір варіанта, перевірка результатів, відповідальність за розуміння кожного
@@ -699,29 +702,31 @@ SpotBugs пройшли, а нові запити стануть основою 
 
 Анотація `@CsvColumn` має `@Retention(RetentionPolicy.RUNTIME)` (доступна рефлексії під час
 виконання) і `@Target(ElementType.FIELD)` (застосовується лише до полів) та елемент `String value()`.
-У класі `PlantRecord` поля позначено так: `ageYears` → `@CsvColumn("вік")`, `heightCm` →
-`@CsvColumn("висота")`, `price` → `@CsvColumn("ціна")`, `species` → `@CsvColumn("вид")`,
-`wateringDays` → `@CsvColumn("полив")`. Порядок стовпців визначається сортуванням Java-імен полів
-(`Field::getName`): `ageYears`, `heightCm`, `price`, `species`, `wateringDays`, що дає стабільний
-заголовок `вік,висота,ціна,вид,полив`.
+У класі `PlantRecord` та базовому класі `Plant` поля позначено в точному порядку колонок варіанта 12:
+`species` → `@CsvColumn("вид")`, `ageYears` → `@CsvColumn("вік")`, `heightCm` →
+`@CsvColumn("висота")`, `price` → `@CsvColumn("ціна")`, `wateringDays` → `@CsvColumn("полив")`.
+Порядок стовпців детермінований і відповідає порядку оголошення полів варіанта 12
+(`species, ageYears, heightCm, price, wateringDays`), що дає заголовок
+`вид,вік,висота,ціна,полив`.
 
 ### 7. Рефлексивний експортер
 
 `CsvExporter` не знає конкретного класу домену: він приймає `Class<T> type` та `List<? extends T> records`,
-проходить ланцюжок класів `for (Class<?> current = type; current != null && current != Object.class; current = current.getSuperclass())`
-(тому підтримує і плоский `PlantRecord`, і успадковані поля `Plant` у підтипах `Tree` та `Flower`),
-відбирає поля з `@CsvColumn`, сортує їх за `Field::getName`, відкриває доступ через `trySetAccessible()`
-і кешує знайдений список `List<Field>` у потокобезпечній карті `ConcurrentHashMap`. Заголовок і
-рядки записуються через `Files.writeString` з явним `StandardCharsets.UTF_8` та опціями
-`CREATE`, `TRUNCATE_EXISTING`, `WRITE`.
+проходить ланцюжок класів від базового до похідного (тому підтримує і плоский `PlantRecord`, і
+успадковані поля `Plant` у підтипах `Tree` та `Flower`), відбирає поля з `@CsvColumn` у порядку
+варіанта, відкриває доступ через `trySetAccessible()` і кешує знайдений список `List<Field>` у
+потокобезпечній карті `ConcurrentHashMap`. У `Controller.execute` застосунок зберігає зчитані
+об'єкти в `Repository<PlantRecord>`, формує CSV-файл на базі збережених об'єктів через
+`CsvExporter.write` і виводить сформований CSV у стандартний потік виводу. Заголовок і рядки
+записуються через `Files.writeString` з явним `StandardCharsets.UTF_8` та опціями `CREATE`,
+`TRUNCATE_EXISTING`, `WRITE`.
 
 ### 8. Формат CSV
 
-- Повний заголовок для `PlantRecord`: `вік,висота,ціна,вид,полив`.
-- Повний заголовок для `Tree` / `Flower` (успадковані поля `Plant`): `висота,категорія,назва,ціна,вид,полив`.
-- Приклад звичайного рядка: `4,120.5,450.0,Хвойні,7`.
+- Повний заголовок для `PlantRecord` та `Plant` (`Tree` / `Flower`): `вид,вік,висота,ціна,полив`.
+- Приклад звичайного рядка: `Хвойні,4,120.5,450.0,7`.
 - Приклад рядка з екрануванням коми та подвійних лапок у полі `species`:
-  `6,180.0,950.0,"Хвойні, декоративні ""Альпійські""",5`.
+  `"Хвойні, декоративні ""Альпійські""",6,180.0,950.0,5`.
 - Кодування: `StandardCharsets.UTF_8` як під час запису, так і під час читання.
 
 ### 9. Імпорт і round-trip
@@ -730,8 +735,8 @@ SpotBugs пройшли, а нові запити стануть основою 
 автоматом станів `CsvParser.parseDocument(text)`, який відстежує прапорці `quoted` і `quoteClosed`
 та не плутає коми чи перенесення рядка всередині лапок із межею поля або запису. Метод
 `PlantRecord.readCsv(path)` пропускає рядок заголовка й відновлює кожен запис через
-`PlantRecord.fromFields(fields)` у тому самому детермінованому порядку полів (`ageYears`, `heightCm`,
-`price`, `species`, `wateringDays`). Порівняння `assertEquals(original, restored)` підтверджує
+`PlantRecord.fromFields(fields)` у тому самому порядку полів варіанта 12 (`species`, `ageYears`,
+`heightCm`, `price`, `wateringDays`). Порівняння `assertEquals(original, restored)` підтверджує
 повний збіг списків, усіх полів і ключів `roundTripKey()`.
 
 ### 10. Помилки
@@ -782,9 +787,11 @@ Pull Request: [PR #34](https://github.com/gameruha/kzp-labs/pull/34) (`Closes #2
 
 Попередні вхідні файли (`data/input.csv`, `data/lab04-input.csv`) та еталонні звіти
 (`data/lab02-expected-report.txt`, `data/lab03-expected-report.txt`, `data/lab04-expected-report.txt`)
-збережено без змін. Тест `newReportStartsWithTheLab4ReportForTheControlFile` доводить, що перші 18
-рядків нового звіту для `data/input.csv` посимвольно збігаються зі звітом лабораторної № 4, а в
-кінець додано інформацію про `Repository<PlantRecord>` та CSV-заголовок `вік,висота,ціна,вид,полив`.
+збережено без змін. Під час запуску `Main` / `Controller` зчитані об'єкти зберігаються в
+`Repository<PlantRecord>` і експортуються у форматі CSV із порядком колонок варіанта 12
+(`вид,вік,висота,ціна,полив`). Тест `newReportStartsWithTheLab4ReportForTheControlFile` також
+доводить, що `ReportFormatter` зберігає всі попередні рядки звіту лабораторної № 4 та додає
+інформацію про `Repository<PlantRecord>` і CSV-заголовок `вид,вік,висота,ціна,полив`.
 
 ### 15. Академічна доброчесність
 

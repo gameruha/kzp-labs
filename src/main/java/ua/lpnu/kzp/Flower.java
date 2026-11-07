@@ -17,8 +17,24 @@ public final class Flower extends Plant {
      * @param wateringDays watering interval in days
      */
     public Flower(String species, String name, double heightCm, double price, int wateringDays) {
+        this(species, name, 1, heightCm, price, wateringDays);
+    }
+
+    /**
+     * Creates a flower with an explicit age in years whose height does not exceed 200 cm and
+     * watering interval is at most 30 days.
+     *
+     * @param species flower species
+     * @param name flower name
+     * @param ageYears flower age in years
+     * @param heightCm flower height in centimeters
+     * @param price flower price
+     * @param wateringDays watering interval in days
+     */
+    public Flower(String species, String name, int ageYears, double heightCm, double price,
+            int wateringDays) {
         // Спочатку базовий клас перевіряє спільні поля, потім підтип — власні правила.
-        super(PlantKind.FLOWER, species, name, heightCm, price, wateringDays);
+        super(PlantKind.FLOWER, species, name, ageYears, heightCm, price, wateringDays);
         if (heightCm > MAX_HEIGHT_CM || wateringDays > MAX_WATERING_DAYS) {
             throw new IllegalArgumentException(
                     "квітка: висота має бути не більшою за 200 см, інтервал поливу — не більшим за 30 днів");

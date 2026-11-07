@@ -3,18 +3,22 @@ package ua.lpnu.kzp;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.List;
 
-/** Controls processing: help, version, or reading, analyzing and reporting the input file. */
+/**
+ * Controls processing: help, version, or reading, storing in {@link Repository} and exporting UTF-8
+ * CSV in Variant 12 column order.
+ */
 final class Controller {
 
     /**
      * Executes the action requested by the options.
      *
      * @param options validated command-line options
-     * @throws IOException if the input cannot be read or the report cannot be written
+     * @throws IOException if the input cannot be read
+     * @throws DataStorageException if CSV parsing or reflective export fails
      */
-    void execute(CommandLineOptions options) throws IOException {
+    void execute(CommandLineOptions options) throws IOException, DataStorageException {
         if (options.help()) {
             System.out.print(ArgumentParser.helpText());
             return;
@@ -23,17 +27,24 @@ final class Controller {
             System.out.println(ApplicationInfo.version());
             return;
         }
-        Analysis analysis = PlantAnalyzer.analyze(Files.readAllLines(options.input(), StandardCharsets.UTF_8));
-        String report = ReportFormatter.format(analysis);
-        System.out.print(report);
-        writeReport(options.output(), report);
+        List<String> lines = Files.readAllLines(options.input(), StandardCharsets.UTF_8);
+        Repository<PlantRecord> repository = new Repository<>();
+        if (isSemicolonInput(lines)) {
+            Analysis analysis = PlantAnalyzer.analyze(lines);
+            for (Plant plant : analysis.plants()) {
+                repository.add(PlantRecord.fromPlant(plant));
+            }
+        } else {
+            for (PlantRecord record : PlantRecord.readCsv(options.input())) {
+                repository.add(record);
+            }
+        }
+        CsvExporter.write(options.output(), PlantRecord.class, repository.all());
+        String csv = Files.readString(options.output(), StandardCharsets.UTF_8);
+        System.out.print(csv);
     }
 
-    private static void writeReport(Path output, String report) throws IOException {
-        Path parent = output.getParent();
-        if (parent != null) {
-            Files.createDirectories(parent);
-        }
-        Files.writeString(output, report, StandardCharsets.UTF_8);
+    private static boolean isSemicolonInput(List<String> lines) {
+        return lines.stream().anyMatch(line -> line.contains(";"));
     }
 }

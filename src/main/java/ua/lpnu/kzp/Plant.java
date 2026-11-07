@@ -9,14 +9,15 @@ import java.util.Objects;
  */
 public abstract sealed class Plant permits Tree, Flower {
 
-    @CsvColumn("категорія")
     private final PlantKind kind;
 
     @CsvColumn("вид")
     private final String species;
 
-    @CsvColumn("назва")
     private final String name;
+
+    @CsvColumn("вік")
+    private final int ageYears;
 
     @CsvColumn("висота")
     private final double heightCm;
@@ -28,7 +29,7 @@ public abstract sealed class Plant permits Tree, Flower {
     private final int wateringDays;
 
     /**
-     * Creates a plant with valid common field values.
+     * Creates a plant with valid common field values and default age of 1 year.
      *
      * @param kind plant category
      * @param species plant species
@@ -40,15 +41,35 @@ public abstract sealed class Plant permits Tree, Flower {
     protected Plant(PlantKind kind, String species, String name, double heightCm, double price,
             int wateringDays) {
         this(requireKind(kind), validateText(species, "species"), validateText(name, "name"),
-                validateHeight(heightCm), validatePrice(price), validateWateringDays(wateringDays), true);
+                1, validateHeight(heightCm), validatePrice(price),
+                validateWateringDays(wateringDays), true);
+    }
+
+    /**
+     * Creates a plant with valid common field values including age in years.
+     *
+     * @param kind plant category
+     * @param species plant species
+     * @param name plant name
+     * @param ageYears plant age in years
+     * @param heightCm plant height in centimeters
+     * @param price plant price
+     * @param wateringDays watering interval in days
+     */
+    protected Plant(PlantKind kind, String species, String name, int ageYears, double heightCm,
+            double price, int wateringDays) {
+        this(requireKind(kind), validateText(species, "species"), validateText(name, "name"),
+                validateAgeYears(ageYears), validateHeight(heightCm), validatePrice(price),
+                validateWateringDays(wateringDays), true);
     }
 
     /* Присвоює вже перевірений стан; делегування не залишає частково створений об'єкт. */
-    private Plant(PlantKind kind, String species, String name, double heightCm, double price,
-            int wateringDays, boolean validated) {
+    private Plant(PlantKind kind, String species, String name, int ageYears, double heightCm,
+            double price, int wateringDays, boolean validated) {
         this.kind = kind;
         this.species = species;
         this.name = name;
+        this.ageYears = ageYears;
         this.heightCm = heightCm;
         this.price = price;
         this.wateringDays = wateringDays;
@@ -57,15 +78,16 @@ public abstract sealed class Plant permits Tree, Flower {
     /**
      * Creates a plant of the matching subtype from a semicolon-separated CSV row.
      *
-     * @param line row in species;name;heightCm;price;wateringDays format
+     * @param line row in {@code species;name;ageYears;heightCm;price;wateringDays} or
+     *     {@code species;name;heightCm;price;wateringDays} format
      * @return validated tree or flower
      * @throws IllegalArgumentException if the row is malformed or violates a plant invariant
      */
     public static Plant fromCsv(String line) {
         Objects.requireNonNull(line, "CSV-рядок не може бути null");
         String[] fields = line.split(";", -1);
-        if (fields.length != 5) {
-            throw new IllegalArgumentException("очікується 5 полів");
+        if (fields.length != 5 && fields.length != 6) {
+            throw new IllegalArgumentException("очікується 5 або 6 полів");
         }
 
         String species = fields[0].trim();
@@ -73,13 +95,15 @@ public abstract sealed class Plant permits Tree, Flower {
         validateText(species, "species");
         validateText(name, "name");
         try {
-            double heightCm = Double.parseDouble(fields[2].trim());
-            double price = Double.parseDouble(fields[3].trim());
-            int wateringDays = Integer.parseInt(fields[4].trim());
+            int ageYears = fields.length == 6 ? Integer.parseInt(fields[2].trim()) : 1;
+            int offset = fields.length == 6 ? 1 : 0;
+            double heightCm = Double.parseDouble(fields[2 + offset].trim());
+            double price = Double.parseDouble(fields[3 + offset].trim());
+            int wateringDays = Integer.parseInt(fields[4 + offset].trim());
             // Підтип обирається один раз під час створення; далі код працює лише зі спільним типом.
             return switch (PlantKind.fromSpecies(species)) {
-                case TREE -> new Tree(species, name, heightCm, price, wateringDays);
-                case FLOWER -> new Flower(species, name, heightCm, price, wateringDays);
+                case TREE -> new Tree(species, name, ageYears, heightCm, price, wateringDays);
+                case FLOWER -> new Flower(species, name, ageYears, heightCm, price, wateringDays);
             };
         } catch (NumberFormatException exception) {
             throw new IllegalArgumentException("неправильний числовий формат", exception);
@@ -96,6 +120,13 @@ public abstract sealed class Plant permits Tree, Flower {
             throw new IllegalArgumentException("species і name не можуть бути порожніми");
         }
         return text.trim();
+    }
+
+    private static int validateAgeYears(int ageYears) {
+        if (ageYears <= 0) {
+            throw new IllegalArgumentException("ageYears має бути додатним");
+        }
+        return ageYears;
     }
 
     private static double validateHeight(double heightCm) {
@@ -150,6 +181,15 @@ public abstract sealed class Plant permits Tree, Flower {
      */
     public final String name() {
         return name;
+    }
+
+    /**
+     * Returns the plant age in years.
+     *
+     * @return plant age in years
+     */
+    public final int ageYears() {
+        return ageYears;
     }
 
     /**

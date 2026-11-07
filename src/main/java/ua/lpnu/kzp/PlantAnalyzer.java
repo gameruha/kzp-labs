@@ -6,7 +6,8 @@ import java.util.List;
 /** Parses CSV lines into plants and collects validation errors. */
 public final class PlantAnalyzer {
 
-    private static final String HEADER = "species;name;heightCm;price;wateringDays";
+    private static final String HEADER_5 = "species;name;heightCm;price;wateringDays";
+    private static final String HEADER_6 = "species;name;ageYears;heightCm;price;wateringDays";
 
     private PlantAnalyzer() {
     }
@@ -23,7 +24,9 @@ public final class PlantAnalyzer {
         for (int index = 0; index < lines.size(); index++) {
             String line = lines.get(index);
             int lineNumber = index + 1;
-            if (lineNumber == 1 && HEADER.equalsIgnoreCase(line.trim())) {
+            String trimmed = line.trim();
+            if (lineNumber == 1
+                    && (HEADER_5.equalsIgnoreCase(trimmed) || HEADER_6.equalsIgnoreCase(trimmed))) {
                 continue;
             }
             if (line.isBlank()) {

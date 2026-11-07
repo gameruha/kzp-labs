@@ -35,10 +35,12 @@ class PlantStreamQueriesTest {
         return list.stream().map(Plant::name).toList();
     }
 
-    /* Контрольний набір містить щонайменше шість коректних записів. */
+    /* Контрольний набір містить щонайменше шість коректних записів із полем віку. */
     @Test
     void controlDatasetHasSevenValidPlants() {
         assertEquals(7, plants.size());
+        assertEquals(List.of(4, 8, 10, 2, 1, 3, 2),
+                plants.stream().map(Plant::ageYears).toList());
     }
 
     /* Запит 1: відбір на межі фільтра (1, 2 дні — так; 3 дні — ні) зберігає порядок. */
