@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kzp-nursery"
-version = "6.0.0"
-description = "Processing plant nursery data in Python (Variant 12)"
+version = "7.0.0"
+description = "Object-oriented processing of plant nursery data in Python (Variant 12)"
 requires-python = ">=3.11"
 dependencies = []
 
@@ -19,6 +19,7 @@ dev = [
 [project.scripts]
 kzp-nursery = "kzp_nursery.cli:main"
 kzp-report = "kzp_nursery.cli:main"
+kzp-oop-report = "kzp_nursery.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
