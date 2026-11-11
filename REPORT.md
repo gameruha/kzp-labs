@@ -162,3 +162,122 @@ Workflow `.github/workflows/ci.yml` виконує тести, `ruff` і збі�
 У лабораторній роботі № 6 створено початкову імплементацію Python-пакета `kzp_nursery` на гілці
 `main-python` (зафіксовану тегом `v6.0.0` і гілкою `release/lab06`), яка стане основою для переходу
 від словникових записів до об'єктно-орієнтованої моделі у лабораторній роботі № 7.
+
+---
+
+# Звіт про виконання лабораторної роботи № 7
+
+## 1. Тема, номер і варіант
+
+- **Тема:** Об'єктно-орієнтована обробка даних у Python.
+- **Лабораторна робота:** № 7.
+- **Варіант:** 12 — Розсадник рослин (`Plant`: підтипи `Tree`, `Flower`; спільна операція —
+  `care_score()` за висотою або поливом; підсумок — потреба в догляді).
+- **Виконавець:** студент групи КІ-302 Куницький М. О.
+- **Гілка та реліз:** гілка `main-python`, релізна гілка `release/lab07`, тег `v7.0.0` (розвиток
+  єдиного пакета `src/kzp_nursery/` після тегу `v6.0.0`).
+- **ОС і версія Python:** Windows 11 (`x86_64`), Python 3.14.3 у `.venv` (сумісність `>=3.11`; у
+  GitHub Actions CI — Python 3.12 на `ubuntu-latest`, `windows-latest`, `macos-latest`).
+
+## 2. Стан до і після
+
+| Ознака | До роботи (ЛР № 6, `v6.0.0`) | Після роботи (ЛР № 7, `v7.0.0`) |
+|---|---|---|
+| Пакет проєкту | `src/kzp_nursery/` (версія `6.0.0`) | Той самий `src/kzp_nursery/` (версія `7.0.0`) |
+| Представлення запису CSV | `dict[str, object]` | Екземпляр класу `Tree(Plant)` або `Flower(Plant)` |
+| Контроль інваріантів | Перевірки під час розбору у `loader.py` | Перевірки у конструкторі `__init__` та `@property` setter-ах класу `Plant` |
+| Предметні умови | Зовнішні функції над ключами словника | Методи об'єкта (`needs_frequent_watering`, `care_score`) |
+| Поліморфне обчислення | Відсутнє (однакова обробка всіх рядків) | Два підтипи `Tree` і `Flower` зі спільним протоколом `CareScored` |
+| Представлення підсумку | Змінний словник `dict[str, object]` | Незмінні `@dataclass(frozen=True)` `CareSummary` та `ReportSummary` |
+| Керування файлами | Стандартний `with path.open(...)` | Власні контекстні менеджери `SafeCsvReader` та `SafeReportWriter` |
+
+## 3. Модель
+
+У модулі `src/kzp_nursery/models.py` реалізовано базовий клас `Plant`:
+- Конструктор `__init__(self, species: str, age: int, height: float, price: float, watering_days: int) -> None`
+  присвоює всі поля через властивості `@property`, тому інваріанти перевіряються вже під час створення.
+- Інкапсульовані поля `_species`, `_age`, `_height`, `_price`, `_watering_days` контролюються через
+  `@property` і setter-валідацію (без рекурсії):
+  - `species` — непорожній рядок після `.strip()`;
+  - `age` — додатне ціле число `int > 0` (значення `bool` відхиляються);
+  - `height` — додатне скінченне дійсне число `float > 0`;
+  - `price` — невід'ємне скінченне дійсне число `float >= 0` (граничне `0.0` дозволене);
+  - `watering_days` — додатне ціле число `int > 0`.
+- Спеціальні методи: `__str__`, `__repr__`, `__eq__` (повертає `NotImplemented` для несумісних типів і
+  перевіряє збіг конкретного підтипу `type(self) is type(other)` та `self.__dict__ == other.__dict__`)
+  і `__lt__` для впорядкування.
+
+## 4. Dataclass
+
+У `src/kzp_nursery/models.py` створено два незмінні `@dataclass(frozen=True)`:
+- `CareSummary(count, total_care_score, average_care_score, highest_care_species, highest_care_score)` —
+  підсумок потреби в догляді;
+- `ReportSummary(count, frequent_watering_count, average_price, tallest_plant, species, average_price_by_species, care, title)` —
+  повний незмінний підсумок звіту з кортежами `tuple`.
+
+## 5. Підтипи та протокол
+
+- Спільний інтерфейс описано через `@runtime_checkable class CareScored(Protocol)` із властивостями
+  `species`, `age`, `height`, `price`, `watering_days` та методом `care_score(self) -> float`.
+- Два підтипи `Plant` викликають `super().__init__(...)` і по-різному реалізують `care_score()`:
+  - `Tree(Plant)`: `round(self.height * 0.5 + self.age * 2.0 + (30.0 / self.watering_days), 2)`;
+  - `Flower(Plant)`: `round((120.0 / self.watering_days) + self.height * 0.2 + self.age * 1.5, 2)`.
+- Функції в `analysis.py` працюють через протокол `CareScored` без перевірок `isinstance`.
+
+## 6. Модулі (`src/kzp_nursery/`)
+
+- `models.py` — класи `Plant`, `Tree`, `Flower`, `@dataclass(frozen=True)` `CareSummary`,
+  `ReportSummary` і `CareScored(Protocol)`.
+- `loader.py` — `SafeCsvReader`, `build_plant`, `iter_records`, `load_records` (`CSV → Plant`).
+- `analysis.py` — поліморфні обчислення над об'єктами та порівняння пам'яті `compare_dict_vs_object_memory`.
+- `reporting.py` — `SafeReportWriter`, `format_report` і `write_report`.
+- `errors.py` — `DataError(ValueError)`.
+- `cli.py` — CLI з захистом `if __name__ == "__main__": raise SystemExit(main())`.
+
+## 7. Тестування
+
+Усі 21 тест-кейс `pytest` у `tests/` (`test_models.py`, `test_loader.py`, `test_analysis.py`,
+`test_reporting.py`, `test_cli.py`) проходять успішно й охоплюють setter-валідацію, `FrozenInstanceError`,
+рівність, обидва підтипи, протокол на незалежному класі `CustomBonsai`, порожній вхід, помилки рядків
+CSV, закриття контекстних менеджерів при винятку, еквівалентність звіту та CLI.
+
+## 8. Порівняння звітів та споживання пам'яті
+
+На контрольному файлі `data/input.csv` старий словниковий звіт (ЛР № 6, `v6.0.0`) і новий об'єктний
+звіт (ЛР № 7, `v7.0.0`) побайтово збігаються. Із прапорцем `--include-care` додатково виводяться
+поліморфні показники:
+
+```text
+Потреба в догляді (сумарна): 767.68 бала
+Потреба в догляді (середня): 109.67 бала
+Найбільша потреба в догляді: Хвойні (181.00 бала)
+```
+
+Порівняння пам'яті на `data/input.csv` (7 записів): поверхневий розмір `sys.getsizeof` становить
+`1504` байти для списку словників проти `2360` байтів для списку об'єктів `Plant` із `__dict__`.
+
+## 9. Інфраструктура
+
+Локально та в GitHub Actions на `ubuntu-latest`, `windows-latest`, `macos-latest` виконуються
+`python -m pytest`, `ruff check .`, `ruff format --check .` та `python -m build --wheel`
+(`dist/kzp_nursery-7.0.0-py3-none-any.whl`).
+
+## 10. GitHub Issues і Pull Request
+
+Розвиток пакета `src/kzp_nursery/` від `v6.0.0` до `v7.0.0` оформлено через Issues #45–#51, окрему
+гілку `lab07-oop`, Pull Request у `main-python`, релізну гілку `release/lab07` і тег `v7.0.0`.
+
+## 11. Академічна доброчесність
+
+Використано ШІ-асистента Antigravity як допоміжний інструмент перевірки. Автор самостійно визначив
+предметні формули `care_score()` для `Tree` і `Flower`, інваріанти властивостей і тестування.
+
+## 12. Відповіді на контрольні питання
+
+Відповіді на всі 20 контрольних питань наведено у звіті до лабораторної роботи № 7.
+
+## 13. Висновки
+
+У лабораторній роботі № 7 пакет `src/kzp_nursery/` на гілці `main-python` послідовно розвинуто від
+словникової моделі (`v6.0.0`, `release/lab06`) до об'єктно-орієнтованої моделі (`v7.0.0`,
+`release/lab07`) із збереженням повної сумісності зовнішнього звіту.

@@ -1,4 +1,4 @@
-"""Інтерфейс командного рядка для обробки даних розсадника рослин (варіант 12)."""
+"""Інтерфейс командного рядка для об'єктно-орієнтованої обробки даних розсадника рослин."""
 
 import argparse
 from pathlib import Path
@@ -14,21 +14,26 @@ def build_parser() -> argparse.ArgumentParser:
     """Створює парсер аргументів командного рядка."""
     parser = argparse.ArgumentParser(
         prog="kzp-nursery",
-        description="Обробка даних розсадника рослин (варіант 12) та побудова звіту.",
+        description="Об'єктно-орієнтована обробка даних розсадника рослин (варіант 12).",
     )
-    parser.add_argument("--input", required=True, type=Path, help="Шлях до CSV-файлу.")
-    parser.add_argument("--output", required=True, type=Path, help="Шлях до звіту.")
+    parser.add_argument("--input", required=True, type=Path, help="Шлях до вхідного CSV-файлу.")
+    parser.add_argument("--output", required=True, type=Path, help="Шлях до вихідного звіту.")
     parser.add_argument(
         "--max-watering-days",
         type=int,
         default=2,
         help="Максимальний інтервал поливу в днях для відбору (за замовчуванням: 2).",
     )
+    parser.add_argument(
+        "--include-care",
+        action="store_true",
+        help="Додати до звіту поліморфні показники потреби в догляді (care_score).",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Запускає CLI та повертає код завершення процесу (0 — успіх, 2 — помилка даних/файлу)."""
+    """Запускає CLI та повертає код завершення (0 — успіх, 2 — помилка даних або файлу)."""
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     if hasattr(sys.stderr, "reconfigure"):
@@ -38,13 +43,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        records = load_records(args.input)
-        summary = make_summary(
-            records,
-            max_watering_days=args.max_watering_days,
-            title="Звіт розсадника рослин (варіант 12)",
-        )
-        report = format_report(summary)
+        plants = load_records(args.input)
+        summary = make_summary(plants, max_watering_days=args.max_watering_days)
+        report = format_report(summary, include_care=args.include_care)
         write_report(args.output, report)
     except (DataError, OSError) as error:
         print(f"Помилка даних: {error}", file=sys.stderr)
